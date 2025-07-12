@@ -48,28 +48,30 @@
             <!-- Input ID -->
             <div class="card shadow mb-1 p-2">
                 <label for="input" class="form-label font-weight-bold">Nomor ID</label>
-                <input type="text" class="form-control" id="input">
+                <input type="text" class="form-control" id="input" autofocus>
                 <p class="text-xs ml-auto mr-2" style="margin-bottom: 0%; margin-top: 2px;"> *Press Enter to Submit</p>
             </div>
 
             <!-- Log Absensi -->
             <div class="log-card card shadow mb-3 p-2">
 
+                {{--
                 <!-- Absen masuk -->
                 <p class="btr-icon-split m-2">
-                    <span class="icon text-gray-600">
-                        <i class="fas fa-arrow-right"></i>
+                    <span class="icon text-success">
+                        <i class="fas fa-right-to-bracket"></i>
                     </span>
-                    <span class="text">absen masuk</span>
+                    <span class="text">[00:00:00] Nama Siswa</span>
                 </p>
 
                 <!-- Absen pulang -->
                 <p class="btr-icon-split m-2">
-                    <span class="icon text-gray-600">
-                        <i class="fas fa-arrow-right"></i>
+                    <span class="icon text-danger">
+                        <i class="fas fa-right-from-bracket"></i>
                     </span>
-                    <span class="text">absen pulang</span>
+                    <span class="text">[00:00:00] Nama Siswa</span>
                 </p>
+                --}}
 
             </div>
         </div>
@@ -78,9 +80,9 @@
             <div class="info-card card shadow mb-3 text-center p-2">
                 <div class="student-photo"></div>
                 <div class="card bg-success text-white shadow mt-auto p-2">
-                    <h3 class="font-weight-bold">Nama</h3>
-                    <h3 class="font-weight-bold">Kelas</h3>
-                    <h3 class="font-weight-bold">00:00</h3>
+                    <h3 class="font-weight-bold" id="nama">Nama</h3>
+                    <h3 class="font-weight-bold" id="unit">unit</h3>
+                    <h3 class="font-weight-bold" id="waktu">00:00</h3>
                 </div>
             </div>
         </div>
@@ -90,19 +92,19 @@
                 <h4 class="font-weight-bold mb-3">Laporan Absensi</h4>
 
                 <div class="card bg-success text-white shadow mb-2 pt-2 pb-4">
-                    <h1 class="font-weight-bold">0</h1>
+                    <h1 class="font-weight-bold" id="count-tepat-waktu">0</h1>
                     <h3 class="font-weight-bold">Tepat Waktu</h3>
                 </div>
                 <div class="card bg-warning text-white shadow mb-2 pt-2 pb-4">
-                    <h1 class="font-weight-bold">0</h1>
+                    <h1 class="font-weight-bold" id="count-terlambat">0</h1>
                     <h3 class="font-weight-bold">Terlambat</h3>
                 </div>
                 <div class="card bg-danger text-white shadow mb-2 pt-2 pb-4">
-                    <h1 class="font-weight-bold">0</h1>
+                    <h1 class="font-weight-bold" id="count-alpa">0</h1>
                     <h3 class="font-weight-bold">Alpa</h3>
                 </div>
                 <div class="card bg-primary text-white shadow mb-2 pt-2 pb-4">
-                    <h1 class="font-weight-bold">0</h1>
+                    <h1 class="font-weight-bold" id="count-total">0</h1>
                     <h3 class="font-weight-bold">Total</h3>
                 </div>
 
@@ -123,6 +125,95 @@
 
     <!-- Page level custom scripts -->
     <script>
+
+        $(document).ready(function () {
+            // Toggle tombol submit berdasarkan checkbox
+            // $('#manualToggle').on('change', function () {
+            //     if ($(this).is(':checked')) {
+            //         $('#submitBtn').removeClass('d-none');
+            //     } else {
+            //         $('#submitBtn').addClass('d-none');
+            //     }
+            // });
+
+            // Event submit saat tekan Enter di input
+            $('#input').on('keypress', function (e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+
+                    // Jika mode manual aktif, jangan submit otomatis
+                    if ($('#manualToggle').is(':checked')) return;
+
+                    submitAbsen();
+                }
+            });
+
+            $(document).on('input', '#input', function () {
+                submitAbsen();
+            });
+
+            // Submit manual
+            // $('#submitBtn').on('click', function () {
+            //     submitAbsen();
+            // });
+
+            function submitAbsen() {
+                const id = $('#input').val();
+
+                if (!id) return alert('ID tidak boleh kosong.');
+
+                $.ajax({
+                    url: '{{ route('scan') }}',
+                    type: 'POST',
+                    data: {
+                        identifier: id
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // jika pakai route web
+                    },
+                    success: function (res) {
+                        console.log(res);
+                        console.log(res.log);
+
+                        $('#nama').text(res.nama);
+                        $('#unit').text(res.unit);
+                        $('#waktu').text(res.waktu);
+
+                        $('#count-tepat-waktu').text(res.count_tepat_waktu);
+                        $('#count-terlambat').text(res.count_terlambat);
+                        $('#count-alpa').text(res.count_alpa);
+                        $('#count-total').text(res.count_total);
+
+                        var logMasukHTML = `
+                            <p class="btr-icon-split m-2">
+                                <span class="icon text-success">
+                                    <i class="fas fa-right-to-bracket"></i>
+                                </span>
+                                <span class="text">[${res.waktu}] ${res.nama}</span>
+                            </p>
+                        `;
+
+                        var logPulangHTML = `
+                            <p class="btr-icon-split m-2">
+                                <span class="icon text-danger">
+                                    <i class="fas fa-right-from-bracket"></i>
+                                </span>
+                                <span class="text">[${res.waktu}] ${res.nama}</span>
+                            </p>
+                        `;
+
+                        $('.log-card').prepend(res.log === 'masuk' ? logMasukHTML : logPulangHTML);
+
+                        $('#input').val('');
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseJSON.console || 'Terjadi kesalahan.');
+                        $('#input').val('');
+                    }
+                });
+            }
+        });
+
         // date & time
         function startTime() {
             const now = new Date();

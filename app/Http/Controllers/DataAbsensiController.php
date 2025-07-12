@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\Student;
+use App\Models\Attendance;
 
 class DataAbsensiController extends Controller
 {
@@ -12,11 +13,11 @@ class DataAbsensiController extends Controller
      */
     public function index()
     {
-        $students = Student::all();
 
-        // dd($students);
+        $students = Attendance::with('student')->where('date', date('Y-m-d'))->get();
+
         $data = [
-            'students' => $students
+            'students' => $students,
         ];
         return view('pages.guru.data-absensi', $data);
     }

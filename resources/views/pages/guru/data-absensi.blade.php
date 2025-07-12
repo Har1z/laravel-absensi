@@ -1,11 +1,11 @@
 @extends('layouts.default-guru')
 
 @section('title')
-    Absensi Siswa - Lab Attendance
+    Data Absensi - Lab Attendance
 @endsection
 
 @section('heading')
-    Absensi Siswa
+    Data Absensi
 @endsection
 
 @section('custom-style')
@@ -62,10 +62,10 @@
                         @foreach ($students as $item)
                         <tr>
                             <td>{{ $item->unit }}</td>
-                            <td>{{ $item->name }}</td>
-                            <td>-</td>
-                            <td>-</td>
-                            <td>-</td>
+                            <td>{{ $item->student->name }}</td>
+                            <td>{{ $item->status ?? '-'}}</td>
+                            <td>{{ $item->check_in_time ?? '-' }}</td>
+                            <td>{{ $item->check_out_time ?? '-' }}</td>
                             <td>-</td>
                             <td>
                                 <a href="#" class="btn btn-warning btn-icon-split btn-sm" title="Edit">
@@ -108,6 +108,16 @@
 
     <!-- Page level custom scripts -->
     <script>
+
+        // Date
+        const now = new Date();
+        const date = now.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById("heading").textContent = 'Data Absensi ( ' + date + ' )';
 
         // Call the dataTables jQuery plugin
         $(document).ready(function() {

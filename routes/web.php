@@ -34,6 +34,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     // Your authenticated routes here
     Route::get('/dashboard', [GuruController::class,'index'])->name('dashboard');
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
+    Route::post('/absensi', [AbsensiController::class,'absen'])->name('scan');
 
     Route::post('/import/student-import', [DataSiswaController::class, 'ImportStudenData'])->name('import.student');
     Route::get('/import/get-template', [DataSiswaController::class, 'GetTemplateData'])->name('import.get-template');
