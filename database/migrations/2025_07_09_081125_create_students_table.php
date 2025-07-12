@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('unit', ['TK', 'SD', 'SMP', 'SMK']);
-            // $table->string('nis')->unique();
+            $table->text('profile_pict');
             $table->date('birth');
             $table->string('gender');
             $table->string('parent_number');
@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('identifier')->unique()->nullable();
             $table->timestamps();
+
+            $table->index('identifier');
         });
     }
 

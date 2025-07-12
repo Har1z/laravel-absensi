@@ -34,6 +34,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     // Your authenticated routes here
     Route::get('/dashboard', [GuruController::class,'index'])->name('dashboard');
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
+    Route::post('/absensi', [AbsensiController::class,'absen'])->name('scan');
 
     Route::resource('/data-siswa', DataSiswaController::class);
     Route::resource('/data-absensi', DataAbsensiController::class);

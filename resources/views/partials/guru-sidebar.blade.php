@@ -40,7 +40,7 @@
     <li class="nav-item {{ Route::current()->getName() == 'data-absensi.index' ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('data-absensi.index') }}">
             <i class="fas fa-fw fa-user-group"></i>
-            <span>Absensi Siswa</span>
+            <span>Data Absensi</span>
         </a>
     </li>
 
@@ -53,12 +53,12 @@
     </li>
 
     <!-- Nav Item - QR code -->
-    <li class="nav-item {{ Route::current()->getName() == 'dashboar' ? 'active' :'' }}">
+    {{-- <li class="nav-item {{ Route::current()->getName() == 'dashboar' ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('dashboard') }}">
             <i class="fas fa-fw fa-qrcode"></i>
             <span>Buat / Unduh QR code</span>
         </a>
-    </li>
+    </li> --}}
 
     <!-- Nav Item - Laporan -->
     {{-- <li class="nav-item {{ Route::current()->getName() == 'dashboar' ? 'active' :'' }}">
@@ -78,9 +78,17 @@
 
     <!-- Nav Item - Kelola Pesan -->
     <li class="nav-item">
-        <a class="nav-link" href="charts.html">
+        <a class="nav-link" href="/kelola-pesan">
             <i class="fas fa-fw fa-comments"></i>
             <span>Kelola Pesan</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Kelola Jam Masuk -->
+    <li class="nav-item">
+        <a class="nav-link" href="/kelola-jam-masuk">
+            <i class="fas fa-fw fa-clock"></i>
+            <span>Kelola Jam Masuk</span>
         </a>
     </li>
 

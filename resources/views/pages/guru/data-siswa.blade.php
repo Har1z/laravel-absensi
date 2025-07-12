@@ -55,6 +55,7 @@
                             <th>Email</th>
                             <th>No. wali</th>
                             <th>No. wali 2</th>
+                            <th>Kode</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -69,6 +70,7 @@
                             <td>{{ $item->email ? $item->email : '-' }}</td>
                             <td>{{ $item->parent_number }}</td>
                             <td>{{ $item->other_parent_number ? $item->other_parent_number : '-' }}</td>
+                            <td>{{ $item->identifier }}</td>
                             <td>
                                 <a href="{{ route('data-siswa.edit', $item->id) }}" class="btn btn-warning btn-icon-split btn-sm" title="Edit">
                                     <span class="icon text-white-50">
