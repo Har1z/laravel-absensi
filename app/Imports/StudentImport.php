@@ -45,7 +45,7 @@ class StudentImport implements ToCollection
             };
 
             if ($row[4] == null) {
-                $row[4] = uniqid()."-".strtoupper($this->unit)."-".str_replace(' ','_',$row[0]);
+                $row[4] = uniqid()."_".strtoupper($this->unit)."_".str_replace(' ','_',$row[0]);
             }
 
             $birthDate = now();
