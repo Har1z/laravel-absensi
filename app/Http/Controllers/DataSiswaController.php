@@ -45,13 +45,19 @@ class DataSiswaController extends Controller
             'name' => 'required',
             'birth' => 'required',
             'gender' => 'required',
-            'parent_number' => 'required',
+            'parent_number' => 'required|numeric',
             'unit' => 'required',
             'identifier' => 'nullable|unique:students,identifier',
             'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
         ]);
 
         $profilePict = null;
+
+        if($validatedData['parent_number'][0] == 0) {
+            $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
+        }
+
+        $validatedData['parent_number'] = "+62".$validatedData['parent_number'];
 
         if ($request->hasFile('file')) {
             $file           = $request->file('file');
@@ -111,15 +117,22 @@ class DataSiswaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required',
             'birth' => 'required',
             'gender' => 'required',
-            'parent_number' => 'required',
+            'parent_number' => 'required|numeric',
             'unit' => 'required',
+            'identifier' => 'required|unique:students,identifier',
         ]);
 
-        Student::FindOrFail($id)->update($request->all());
+        if($validatedData['parent_number'][0] == 0) {
+            $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
+        }
+
+        $validatedData['parent_number'] = "+62".$validatedData['parent_number'];
+
+        Student::FindOrFail($id)->update($validatedData);
         return redirect()->route('data-siswa.index');
     }
 

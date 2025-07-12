@@ -75,12 +75,12 @@
 
                             <div class="mb-3 mt-3">
                                 <label for="parentNumberInput" class="form-label">No. wali murid</label>
-                                <input type="number" class="form-control" id="parentNumberInput" name="parent_number" value="{{ old('parent_number', $student->parent_number ?? '') }}" autocomplete="off" required="">
+                                <input type="text" class="form-control" id="parentNumberInput" name="parent_number" value="{{ old('parent_number', $student->parent_number ?? '') }}" autocomplete="off" required="">
                             </div>
 
                             <div class="mb-3 mt-3">
                                 <label for="otherParentNumberInput" class="form-label">No. wali murid lainnya (opsional)</label>
-                                <input type="number" class="form-control" id="otherParentNumberInput" name="other_parent_number" value="{{ old('other_parent_numberr', $student->other_parent_numberr ?? '') }}" autocomplete="off">
+                                <input type="text" class="form-control" id="otherParentNumberInput" name="other_parent_number" value="{{ old('other_parent_numberr', $student->other_parent_numberr ?? '') }}" autocomplete="off">
                             </div>
 
                             <div class="mb-3">
