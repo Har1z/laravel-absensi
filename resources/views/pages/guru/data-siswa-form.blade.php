@@ -116,7 +116,7 @@
                         <div class="col-12 col-lg-4 mb-3">
                             <div class="mt-3">
                                 <label for="" class="form-label">Kode Absen (Opsional)</label>
-                                <input type="text" class="form-control" name="identifier">
+                                <input type="text" class="form-control" name="identifier" value="{{ old('identifier', $student->identifier ?? '') }}">
                             </div>
                             <div class="mt-3">
                                 <label for="" class="form-label">Foto Murid</label>
@@ -147,7 +147,15 @@
                 {{-- </div> --}}
             </div>
         </div>
-        <span id="oldPict" data-path="{{ $student->profile_pict ?? 0 }}"></span>
+        <span id="oldPict" data-path="{{ $studentPict ?? '0' }}"></span>
+
+        @if ($errors->first())
+            <ol>
+                @foreach ($errors->all() as $item)
+                    <li>{{ $item }}</li>
+                @endforeach
+            </ol>
+        @endif
     </div>
 
     <script>
@@ -157,6 +165,7 @@
             const oldPict = $("#oldPict").attr("data-path");
 
             let files = oldPict != '0' ? [{source: `${oldPict}`}] : [];
+            console.log(oldPict);
 
             const pond = FilePond.create(document.querySelector('#image-preview'), {
                 allowImagePreview : true,

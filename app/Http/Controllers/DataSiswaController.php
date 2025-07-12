@@ -47,7 +47,7 @@ class DataSiswaController extends Controller
             'gender' => 'required',
             'parent_number' => 'required|numeric',
             'unit' => 'required',
-            'identifier' => 'nullable|unique:students,identifier',
+            'identifier' => 'required|unique:students,identifier',
             'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
         ]);
 
@@ -62,7 +62,7 @@ class DataSiswaController extends Controller
         if ($request->hasFile('file')) {
             $file           = $request->file('file');
             $fileOriginName = $file->getClientOriginalName();
-            $profilePict    = str_replace('public/','',$file->storeAs('public/uploads/profile_pict', $fileOriginName));
+            $profilePict    = str_replace('public/','',$file->storeAs('uploads/profile_pict', uniqid()."_".$fileOriginName));
         }
 
         $validatedData['profile_pict'] = $profilePict;
@@ -109,7 +109,15 @@ class DataSiswaController extends Controller
     public function edit(string $id)
     {
         $student = Student::FindOrFail($id);
-        return view('pages.guru.data-siswa-form', compact('student'));
+        $studentPict = Storage::disk('public')->exists($student->profile_pict ?? 'NONE')
+                ? asset('storage/'.$student->profile_pict)
+                : null; // Ganti Null jadi default image kalo kosong
+
+        $data = [
+            'student'     => $student,
+            'studentPict' => $studentPict,
+        ];
+        return view('pages.guru.data-siswa-form', $data);
     }
 
     /**
@@ -123,16 +131,49 @@ class DataSiswaController extends Controller
             'gender' => 'required',
             'parent_number' => 'required|numeric',
             'unit' => 'required',
-            'identifier' => 'required|unique:students,identifier',
+            'file' => 'nullable|max:150|image|mimes:png,jpeg,jpg',
+            'identifier' => 'required|unique:students,identifier,'.$id,
         ]);
 
+        $student                   = Student::findOrFail($id);
+        $currentStudentProfilePict = null;
+        $studentOldPictFileName    = null;
+        $pict                      = $student->profile_pict;
+
+        $student->profile_pict && $currentStudentProfilePict = explode('/', $student->profile_pict);
+        if ($currentStudentProfilePict) {
+            $studentOldPictFileName = end($currentStudentProfilePict);
+        }
+
+        if ($request->hasFile('file')) {
+            $newFile                = $request->file('file');
+            $newFileOriginName      = $newFile->getClientOriginalName();
+            $isNewFileSameAsOldFile = $studentOldPictFileName == $newFileOriginName;
+
+            if ($student->profile_pict && !$isNewFileSameAsOldFile && Storage::disk('public')->exists($student->profile_pict)) {
+                Storage::disk('public')->delete($student->profile_pict);
+                $pict = str_replace('public/','',$newFile->storeAs('uploads/profile_pict', uniqid()."_".$newFileOriginName));
+            } else if (!$student->profile_pict) {
+                $pict = str_replace('public/','',$newFile->storeAs('uploads/profile_pict', uniqid()."_".$newFileOriginName));
+            }
+        } else {
+            $pict = null;
+            if ($student->profile_pict && Storage::disk('public')->exists($student->profile_pict)) {
+                Storage::disk('public')->delete($student->profile_pict);
+            }
+        }
+
+        $validatedData['parent_number'] = str_replace('+62','',$validatedData['parent_number']);
         if($validatedData['parent_number'][0] == 0) {
             $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
         }
 
         $validatedData['parent_number'] = "+62".$validatedData['parent_number'];
+        $validatedData['profile_pict']  = $pict;
 
-        Student::FindOrFail($id)->update($validatedData);
+        $student->update($validatedData);
+
+        return dd($validatedData);
         return redirect()->route('data-siswa.index');
     }
 
@@ -144,7 +185,7 @@ class DataSiswaController extends Controller
         $student = Student::findOrFail($id);
         $studentPict = $student->profile_pict;
         $student->delete();
-        if ($studentPict && Storage::disk('pubilc')->exists($studentPict)) {
+        if ($studentPict && Storage::disk('public')->exists($studentPict)) {
             Storage::delete($studentPict);
         }
         return redirect()->route('data-siswa.index');

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('unit', ['TK', 'SD', 'SMP', 'SMK']);
-            $table->text('profile_pict');
+            $table->string('profile_pict')->nullable();
             $table->date('birth');
             $table->string('gender');
             $table->string('parent_number');

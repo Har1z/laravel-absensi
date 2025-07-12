@@ -26,6 +26,7 @@ class Student extends Model
         'unit',
         'email',
         'identifier',
+        'profile_pict',
         'created_at', // auto input
         'updated_at', // auto input
     ];
