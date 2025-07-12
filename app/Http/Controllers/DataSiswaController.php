@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GetTemplateExport;
+use App\Imports\StudentImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DataSiswaController extends Controller
 {
@@ -37,27 +41,52 @@ class DataSiswaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required',
             'birth' => 'required',
             'gender' => 'required',
             'parent_number' => 'required',
             'unit' => 'required',
+            'identifier' => 'nullable|unique:students,identifier',
+            'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
         ]);
 
-        $data = $request->all();
+        $profilePict = null;
+
+        if ($request->hasFile('file')) {
+            $file           = $request->file('file');
+            $fileOriginName = $file->getClientOriginalName();
+            $profilePict    = str_replace('public/','',$file->storeAs('public/uploads/profile_pict', $fileOriginName));
+        }
+
+        $validatedData['profile_pict'] = $profilePict;
 
         // check if the identifier is empty (if empty, generate it)
         if (empty($data['identifier'])) {
-            $unit = strtoupper($request->unit); // TK, SD, SMP, SMK
-            $name = preg_replace('/\s+/', '', $request->name); // Hilangkan spasi
-            $random = rand(100, 999);
+            $unit   = strtoupper($request->unit); // TK, SD, SMP, SMK
+            $name   = preg_replace('/\s+/', '_', $request->name); // replace spasi jadi underscore
+            $random = uniqid();
 
-            $data['identifier'] = "{$unit}-{$name}-{$random}";
+            $validatedData['identifier'] = "{$random}_{$unit}_{$name}";
         }
 
-        Student::create($data);
+        Student::create($validatedData);
         return redirect()->route('data-siswa.index');
+    }
+
+    public function ImportStudenData(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        Excel::import(new StudentImport($request->unit), $request->file('file'));
+        return back()->with('success', 'Data berhasil diimpor!');
+    }
+
+    public function GetTemplateData()
+    {
+        return Excel::download(new GetTemplateExport, 'template-import-siswa.xlsx');
     }
 
     /**
@@ -99,7 +128,12 @@ class DataSiswaController extends Controller
      */
     public function destroy(string $id)
     {
-        Student::FindOrFail($id)->delete();
+        $student = Student::findOrFail($id);
+        $studentPict = $student->profile_pict;
+        $student->delete();
+        if ($studentPict && Storage::disk('pubilc')->exists($studentPict)) {
+            Storage::delete($studentPict);
+        }
         return redirect()->route('data-siswa.index');
     }
 }

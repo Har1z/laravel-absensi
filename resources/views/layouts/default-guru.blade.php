@@ -65,5 +65,7 @@
 
     @include('partials.scripts')
     @yield('custom-scripts')
+    <script src="{{ asset('js/filepond/filepond.js') }}"></script>
+    <script src="{{ asset('js/filepond/filepond-plugin-image-preview.js') }}"></script>
 </body>
 </html>

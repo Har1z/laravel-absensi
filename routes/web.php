@@ -35,6 +35,9 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::get('/dashboard', [GuruController::class,'index'])->name('dashboard');
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
 
+    Route::post('/import/student-import', [DataSiswaController::class, 'ImportStudenData'])->name('import.student');
+    Route::get('/import/get-template', [DataSiswaController::class, 'GetTemplateData'])->name('import.get-template');
+
     Route::resource('/data-siswa', DataSiswaController::class);
     Route::resource('/data-absensi', DataAbsensiController::class);
 

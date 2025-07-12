@@ -31,6 +31,10 @@
             -moz-appearance: none;
             appearance: none;
         }
+
+        .filepond--credits {
+            display: none;
+        }
     </style>
 @endsection
 
@@ -39,10 +43,10 @@
     <!-- Content Row -->
     <div class="row">
         <div class="col-xl-12 col-lg-12">
-            <div class="card shadow mb-4">
-                <div class="card-body">
+            <div class="bg-white shadow mb-4 p-3">
+                {{-- <div class="card-body"> --}}
 
-                    <form action="{{ isset($student) ? route('data-siswa.update', $student) : route('data-siswa.store') }}" method="POST">
+                    <form action="{{ isset($student) ? route('data-siswa.update', $student) : route('data-siswa.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @if (isset($student))
                         @method('PUT')
@@ -108,6 +112,17 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-12 col-lg-4 mb-3">
+                            <div class="mt-3">
+                                <label for="" class="form-label">Kode Absen (Opsional)</label>
+                                <input type="text" class="form-control" name="identifier">
+                            </div>
+                            <div class="mt-3">
+                                <label for="" class="form-label">Foto Murid</label>
+                                <input type="file" class="filepond" id="image-preview" name="file">
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-6 col-lg-2   mb-3">
@@ -129,10 +144,30 @@
                     </div>
                     </form>
 
-                </div>
+                {{-- </div> --}}
             </div>
         </div>
+        <span id="oldPict" data-path="{{ $student->profile_pict ?? 0 }}"></span>
     </div>
+
+    <script>
+        $(document).ready(function () {
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+
+            const oldPict = $("#oldPict").attr("data-path");
+
+            let files = oldPict != '0' ? [{source: `${oldPict}`}] : [];
+
+            const pond = FilePond.create(document.querySelector('#image-preview'), {
+                allowImagePreview : true,
+                allowMultiple     : false,
+                allowRevert       : true,
+                allowRemove       : true,
+                storeAsFile       : true,
+                files             : files,
+            });
+        });
+    </script>
 
 @endsection
 

@@ -48,14 +48,17 @@
                 <table class="table table-bordered" id="siswaTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            <th>Nama</th>
-                            <th>Unit</th>
-                            <th>Tgl. Lahir</th>
-                            <th>L / P</th>
-                            <th>Email</th>
-                            <th>No. wali</th>
-                            <th>No. wali 2</th>
-                            <th>Aksi</th>
+                            <th rowspan="2">Nama</th>
+                            <th rowspan="2">Unit</th>
+                            <th rowspan="2">Tgl. Lahir</th>
+                            <th rowspan="2">L / P</th>
+                            <th rowspan="2">Kode Absensi</th>
+                            <th colspan="2">No. wali</th>
+                            <th rowspan="2">Aksi</th>
+                        </tr>
+                        <tr>
+                            <th>Utama</th>
+                            <th>Lainnya</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,7 +69,7 @@
                             <td>{{ $item->unit }}</td>
                             <td>{{ $item->formatted_birth }}</td>
                             <td>{{ $item->gender }}</td>
-                            <td>{{ $item->email ? $item->email : '-' }}</td>
+                            <td>{{ $item->identifier ?? '-' }}</td>
                             <td>{{ $item->parent_number }}</td>
                             <td>{{ $item->other_parent_number ? $item->other_parent_number : '-' }}</td>
                             <td>
@@ -123,6 +126,57 @@
             </div>
         </div>
     </div>
+
+    {{-- IMPORT DATA MODAL --}}
+    <div class="modal" tabindex="-1" id="import-data">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <a class="btn btn-primary import-data-btn w-100" data-unit="TK">
+                                TK
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-primary import-data-btn w-100" data-unit="SD">
+                                SD
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-primary import-data-btn w-100" data-unit="SMP">
+                                SMP
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-primary import-data-btn w-100" data-unit="SMK">
+                                SMK
+                            </a>
+                        </div>
+                    </div>
+                    <form action="{{ route('import.student') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="my-3 mt-5">
+                            <label id="import-label" class="form-label h4">TK</label>
+                            <input type="hidden" name="unit" value="TK" id="import-unit">
+                            <input type="file" name="file" id="file-preview" class="filepond">
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-success">
+                                Kirim
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('custom-scripts')
@@ -135,6 +189,13 @@
 
         // Call the dataTables jQuery plugin
         $(document).ready(function() {
+            const pond = FilePond.create(document.querySelector('#file-preview'), {
+                allowImagePreview : false,
+                allowMultiple     : false,
+                allowRevert       : true,
+                allowRemove       : true,
+                storeAsFile       : true,
+            });
 
             $('#confirmDeleteModal').on('show.bs.modal', function (event) {
                 var button = $(event.relatedTarget); // button that triggered the modal
@@ -155,6 +216,12 @@
             $('#siswaTable_length').prepend(
                 "<a href='{{ route('data-siswa.create') }}' class='btn btn-success btn-icon-split btn-sm mr-2 mb-2' title='Tambah data siswa'><span class='icon text-white-50'><i class='fas fa-user-plus'></i></span><span class='text'>Tambah data</span></a>"
             );
+            $('#siswaTable_length').prepend(
+                "<a data-toggle='modal' data-target='#import-data' class='btn btn-primary btn-icon-split btn-sm mr-2 mb-2' title='Import Data'><span class='icon text-white-50'><i class='fa-solid fa-file-csv'></i></span><span class='text'>Import Data</span></a>"
+            );
+            $('#siswaTable_length').prepend(
+                "<a href='{{ route('import.get-template') }}' class='btn btn-info btn-icon-split btn-sm mr-2 mb-2' title='Template'><span class='icon text-white-50'><i class='fa-solid fa-file-csv'></i></span><span class='text'>Template</span></a>"
+            );
             $('#siswaTable_filter').addClass('p-2');
             $('#siswaTable_length').addClass('p-2');
 
@@ -171,6 +238,13 @@
                 $('.filter-unit').removeClass('btn-primary').addClass('btn-secondary');
                 $(this).removeClass('btn-secondary').addClass('btn-primary');
                 applyFilters();
+            });
+
+            $(".import-data-btn").on("click", function() {
+                let currentBtn = $(this);
+
+                $("#import-unit").val(currentBtn.attr("data-unit"));
+                $("#import-label").text(currentBtn.attr("data-unit"));
             });
 
         });
