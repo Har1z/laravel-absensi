@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\DataSiswaController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,9 +32,10 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware([AuthMiddleware::class])->group(function () {
 
-    // Your authenticated routes here
     Route::get('/dashboard', [GuruController::class,'index'])->name('dashboard');
+
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
+    Route::post('/absensi/getLog', [AbsensiController::class,'getAttendanceLog'])->name('absensi.log');
     Route::post('/absensi', [AbsensiController::class,'absen'])->name('scan');
 
     Route::post('/import/student-import', [DataSiswaController::class, 'ImportStudenData'])->name('import.student');
@@ -41,5 +43,12 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::resource('/data-siswa', DataSiswaController::class);
     Route::resource('/data-absensi', DataAbsensiController::class);
+
+    // i really want to make it using resource but i'll do normal route since there's no create method ::))
+    Route::get('/jam-masuk', [SettingController::class, 'attendanceTime'])->name('setting.attendance-time');
+    Route::post('/jam-masuk', [SettingController::class, 'updateAttendanceTime'])->name('update.attendance-time');
+
+    Route::get('/kelola-pesan', [SettingController::class, 'attendanceMessage'])->name('setting.attendance-message');
+    Route::post('/kelola-pesan', [SettingController::class, 'updateAttendanceMessage'])->name('update.attendance-message');
 
 });

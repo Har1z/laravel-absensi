@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use App\Models\Attendance;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -34,36 +35,32 @@ class AbsensiController extends Controller
             ->whereDate('date', $today)
             ->first();
 
-        // get count of present, late, absent, total
-        $counts = Attendance::selectRaw("
-            SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as count_tepat_waktu,
-            SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as count_terlambat,
-            SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as count_alpa,
-            COUNT(*) as count_total
-        ")->where('student_id', $student->id)->first();
-
-        // if hasn't present → do check-in
-        if (!$attendance) {
-            Attendance::create([
-                'student_id' => $student->id,
-                'date' => $today,
-                'check_in_time' => now(),
-                'unit' => $student->unit,
-                'status' => 'present',
-            ]);
-
-            return response()->json(
-                [
-                    'log' => 'masuk',
-                    'console' => 'Berhasil check-in siswa : ' . $student->name,
-                    'nama' => $student->name,
+            // if hasn't present → do check-in
+            if (!$attendance) {
+                Attendance::create([
+                    'student_id' => $student->id,
+                    'date' => $today,
+                    'check_in_time' => now(),
                     'unit' => $student->unit,
-                    'waktu' => now()->format('H:i:s'),
-                    'count_tepat_waktu' => $counts->count_tepat_waktu,
-                    'count_terlambat' => $counts->count_terlambat,
-                    'count_alpa' => $counts->count_alpa,
-                    'count_total' => $counts->count_total,
+                    'status' => 'present',
                 ]);
+
+                // get count of present, late, absent, total
+                $counts = $this->getStatistics($student->id);
+
+                return response()->json(
+                    [
+                        'log' => 'masuk',
+                        'console' => 'Berhasil check-in siswa : ' . $student->name,
+                        'nama' => $student->name,
+                        'profile_pict' => asset('storage/' . $student->profile_pict),
+                        'unit' => $student->unit,
+                        'waktu' => now()->format('H:i:s'),
+                        'count_tepat_waktu' => $counts->count_tepat_waktu,
+                        'count_terlambat' => $counts->count_terlambat,
+                        'count_alpa' => $counts->count_alpa,
+                        'count_total' => $counts->count_total,
+                    ]);
         }
 
         // if already present → check if already check-out
@@ -72,11 +69,15 @@ class AbsensiController extends Controller
                 'check_out_time' => now(),
             ]);
 
+            // get count of present, late, absent, total
+            $counts = $this->getStatistics($student->id);
+
             return response()->json(
                 [
                     'log' => 'pulang',
                     'console' => 'Berhasil check-out siswa : ' . $student->name,
                     'nama' => $student->name,
+                    'profile_pict' => asset('storage/' . $student->profile_pict),
                     'unit' => $student->unit,
                     'waktu' => now()->format('H:i:s'),
                     'count_tepat_waktu' => $counts->count_tepat_waktu,
@@ -90,37 +91,58 @@ class AbsensiController extends Controller
         return response()->json(['console' => 'Sudah check-out hari ini'], 403);
     }
 
-    public function checkIn(Request $request)
-    {
-        $student = Student::where('identifier', $request->identifier)->firstOrFail();
 
-        $attendance = Attendance::firstOrCreate(
-            [
-                'student_id' => $student->id,
-                'date' => now()->toDateString()
-            ],
-            [
-                'unit' => $student->unit,
-                'status' => 'present',
-                'check_in_time' => now()
-            ]
-        );
+    // how to make this func automatically run afterschool... uh, I don't know.
+    public function markAbsentStudents() {
+        $today = Carbon::today()->toDateString();
 
-        return response()->json(['message' => 'Absen masuk berhasil']);
+        $students = Student::all();
+
+        foreach ($students as $student) {
+            $alreadyPresent = Attendance::where('student_id', $student->id)
+                ->whereDate('date', $today)
+                ->exists();
+
+            if (!$alreadyPresent) {
+                Attendance::create([
+                    'student_id' => $student->id,
+                    'date' => $today,
+                    'unit' => $student->unit,
+                    'status' => 'absent',
+                ]);
+            }
+        }
     }
 
-    public function checkOut(Request $request)
-    {
-        $student = Student::where('identifier', $request->identifier)->firstOrFail();
+    private function getStatistics($studentId)  {
+        // get count of present, late, absent, total
+        $counts = Attendance::selectRaw("
+            SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as count_tepat_waktu,
+            SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as count_terlambat,
+            SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as count_alpa,
+            COUNT(*) as count_total
+        ")->where('student_id', $studentId)->first();
 
-        $attendance = Attendance::where('student_id', $student->id)
-            ->whereDate('date', now())
-            ->firstOrFail();
+        return $counts;
+    }
 
-        $attendance->update([
-            'check_out_time' => now()
-        ]);
+    public function getAttendanceLog(){
+        $today = Carbon::today()->toDateString();
 
-        return response()->json(['message' => 'Absen pulang berhasil']);
+        $checkInQuery = DB::table('attendances')
+            ->join('students', 'attendances.student_id', '=', 'students.id')
+            ->select('students.name', 'attendances.student_id', DB::raw("'masuk' as type"), 'check_in_time as time')
+            ->where('attendances.date', $today);
+
+        $logs = DB::table('attendances')
+            ->join('students', 'attendances.student_id', '=', 'students.id')
+            ->select('students.name', 'attendances.student_id', DB::raw("'pulang' as type"), 'check_out_time as time')
+            ->where('attendances.date', $today)
+            ->unionAll($checkInQuery)
+            ->orderBy('time', 'asc')
+            ->get();
+
+        // dd($logs);
+        return response()->json($logs);
     }
 }

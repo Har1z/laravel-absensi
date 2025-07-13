@@ -47,7 +47,7 @@ class DataSiswaController extends Controller
             'gender' => 'required',
             'parent_number' => 'required|numeric',
             'unit' => 'required',
-            'identifier' => 'required|unique:students,identifier',
+            'identifier' => 'nullable|unique:students,identifier',
             'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
         ]);
 
@@ -62,7 +62,7 @@ class DataSiswaController extends Controller
         if ($request->hasFile('file')) {
             $file           = $request->file('file');
             $fileOriginName = $file->getClientOriginalName();
-            $profilePict    = str_replace('public/','',$file->storeAs('uploads/profile_pict', uniqid()."_".$fileOriginName));
+            $profilePict    = str_replace('public/','',$file->storeAs('public/uploads/profile_pict', uniqid()."_".$fileOriginName)); // "uploads/profile_pict" ?
         }
 
         $validatedData['profile_pict'] = $profilePict;
@@ -173,7 +173,7 @@ class DataSiswaController extends Controller
 
         $student->update($validatedData);
 
-        return dd($validatedData);
+        // return dd($validatedData);
         return redirect()->route('data-siswa.index');
     }
 

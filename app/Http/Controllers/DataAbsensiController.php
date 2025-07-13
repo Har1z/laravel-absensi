@@ -67,6 +67,7 @@ class DataAbsensiController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Attendance::FindOrFail($id)->delete();
+        return redirect()->route('data-absensi.index');
     }
 }

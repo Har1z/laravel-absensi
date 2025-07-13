@@ -16,7 +16,7 @@
             height: 26rem;
             border-radius: 50%;
             background-color: #dee2e6;
-            background-image: url('https://picsum.photos/500'); // use asset later?
+            /* background-image: url('https://picsum.photos/500'); // use asset later? */
             background-size: cover;
             background-position: center;
             margin-left: auto;
@@ -78,7 +78,7 @@
 
         <div class="col-xl-6 col-lg-6">
             <div class="info-card card shadow mb-3 text-center p-2">
-                <div class="student-photo"></div>
+                <img class="student-photo" id="profile_pict" src=""></img>
                 <div class="card bg-success text-white shadow mt-auto p-2">
                     <h3 class="font-weight-bold" id="nama">Nama</h3>
                     <h3 class="font-weight-bold" id="unit">unit</h3>
@@ -127,14 +127,7 @@
     <script>
 
         $(document).ready(function () {
-            // Toggle tombol submit berdasarkan checkbox
-            // $('#manualToggle').on('change', function () {
-            //     if ($(this).is(':checked')) {
-            //         $('#submitBtn').removeClass('d-none');
-            //     } else {
-            //         $('#submitBtn').addClass('d-none');
-            //     }
-            // });
+            getLog();
 
             // Event submit saat tekan Enter di input
             $('#input').on('keypress', function (e) {
@@ -175,6 +168,7 @@
                         console.log(res);
                         console.log(res.log);
 
+                        $('#profile_pict').attr('src', res.profile_pict);
                         $('#nama').text(res.nama);
                         $('#unit').text(res.unit);
                         $('#waktu').text(res.waktu);
@@ -184,31 +178,43 @@
                         $('#count-alpa').text(res.count_alpa);
                         $('#count-total').text(res.count_total);
 
-                        var logMasukHTML = `
-                            <p class="btr-icon-split m-2">
-                                <span class="icon text-success">
-                                    <i class="fas fa-right-to-bracket"></i>
-                                </span>
-                                <span class="text">[${res.waktu}] ${res.nama}</span>
-                            </p>
-                        `;
-
-                        var logPulangHTML = `
-                            <p class="btr-icon-split m-2">
-                                <span class="icon text-danger">
-                                    <i class="fas fa-right-from-bracket"></i>
-                                </span>
-                                <span class="text">[${res.waktu}] ${res.nama}</span>
-                            </p>
-                        `;
-
-                        $('.log-card').prepend(res.log === 'masuk' ? logMasukHTML : logPulangHTML);
-
+                        getLog();
                         $('#input').val('');
                     },
                     error: function (xhr) {
                         console.log(xhr.responseJSON.console || 'Terjadi kesalahan.');
                         $('#input').val('');
+                    }
+                });
+            }
+
+            function getLog() {
+                $.ajax({
+                    url: '{{ route("absensi.log") }}',
+                    type: 'POST',
+                    data: {
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function (res) {
+                        $('.log-card').empty();
+
+                        res.forEach(res => {
+                            const logHTML = `
+                                <p class="btr-icon-split m-2">
+                                    <span class="icon ${res.type === 'masuk' ? 'text-success' : 'text-danger'}">
+                                        <i class="fas fa-${res.type === 'masuk' ? 'right-to-bracket' : 'right-from-bracket'}"></i>
+                                    </span>
+                                    <span class="text">[${res.time}] ${res.name}</span>
+                                </p>
+                            `;
+
+                            $('.log-card').prepend(logHTML);
+                        });
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseJSON.console || 'Terjadi kesalahan.');
                     }
                 });
             }

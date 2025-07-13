@@ -77,16 +77,16 @@
     </div>
 
     <!-- Nav Item - Kelola Pesan -->
-    <li class="nav-item">
-        <a class="nav-link" href="/kelola-pesan">
+    <li class="nav-item {{ Route::current()->getName() == 'setting.attendance-message' ? 'active' :'' }}">
+        <a class="nav-link" href="{{ route('setting.attendance-message') }}">
             <i class="fas fa-fw fa-comments"></i>
             <span>Kelola Pesan</span>
         </a>
     </li>
 
     <!-- Nav Item - Kelola Jam Masuk -->
-    <li class="nav-item">
-        <a class="nav-link" href="/kelola-jam-masuk">
+    <li class="nav-item {{ Route::current()->getName() == 'setting-attendance-time' ? 'active' :'' }}">
+        <a class="nav-link" href="{{ route('setting.attendance-time') }}">
             <i class="fas fa-fw fa-clock"></i>
             <span>Kelola Jam Masuk</span>
         </a>

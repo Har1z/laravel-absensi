@@ -75,7 +75,7 @@
                                     {{-- <span class="text">Edit</span> --}}
                                 </a>
                                 <a class="btn btn-danger btn-icon-split btn-sm" title="Hapus" data-toggle="modal" data-target="#confirmDeleteModal"
-                                    data-id='{{ $item->id }}' data-name="{{ $item->name }}" data-url="{{ route('data-siswa.destroy', $item->id) }}">
+                                    data-id='{{ $item->id }}' data-name="{{ $item->student->name }}" data-url="{{ route('data-absensi.destroy', $item->id) }}">
                                     <span class="icon text-white-50">
                                         <i class="fas fa-trash"></i>
                                     </span>
@@ -99,6 +99,28 @@
 @endsection
 
 @section('modal')
+    <!-- Confirm deletion Modal-->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm deletion.</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Pilih “Hapus” di bawah ini jika Anda benar-benar ingin menghapus data absensi.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <form action="" method="POST" id="deleteForm">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('custom-scripts')
@@ -118,6 +140,19 @@
             day: 'numeric'
         });
         document.getElementById("heading").textContent = 'Data Absensi ( ' + date + ' )';
+
+        $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // button that triggered the modal
+            var url = button.data('url');
+            var name = button.data('name');
+
+            // Update modal title
+            var modal = $(this);
+            modal.find('.modal-title').text('Confirm deletion of (' + name + ')');
+
+            // Update action form
+            modal.find('#deleteForm').attr('action', url);
+        });
 
         // Call the dataTables jQuery plugin
         $(document).ready(function() {
