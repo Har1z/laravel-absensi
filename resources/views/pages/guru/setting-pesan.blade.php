@@ -83,7 +83,13 @@
                             @foreach ($data as $unit => $setting)
                                 <button type="button" class="btn btn-secondary btn-unit" data-unit="{{ $unit }}">{{ $unit }}</button>
                             @endforeach
-                            <p class="mt-3">note : udah bisa nyimpen pesan tapi pas absen blm ada fitur kirim pesannya</p>
+                        </div>
+                        <div class="col-12 col-xl-6 col-lg-6 col-md-6">
+                            <h5 class=""><b>NOTE</b></h5>
+                            <ul class="pl-3">
+                                <li>Gunakan "{nama}" untuk menambah nama siswa pada pesan WhatsApp</li>
+                                <li>Nama siswa yang tertulis pada tampilan hanya sebagai contoh</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -105,7 +111,12 @@
                         <label for="inputHadir" class="form-label mt-1"><b>Pesan Absen Masuk</b></label>
                         <textarea name="in_message" class="form-control mb-2" id="inputHadir"></textarea>
 
-
+                        <div class="preview-chat mb-1 mt-3">
+                            <div class="chat-bubble">
+                                <p class="fs-6" id="pesan-masuk"></p>
+                                <span class="chat-time">05.23</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-lg-1"></div>
@@ -114,7 +125,12 @@
                         <label for="inputPulang" class="form-label mt-1"><b>Pesan Absen Pulang</b></label>
                         <textarea name="out_message" class="form-control mb-2" id="inputPulang"></textarea>
 
-
+                        <div class="preview-chat mb-1 mt-3">
+                            <div class="chat-bubble">
+                                <p class="fs-6" id="pesan-pulang"></p>
+                                <span class="chat-time">07.13</span>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -166,6 +182,28 @@
 
             // Trigger default selection (e.g., TK)
             $('.btn-unit[data-unit="TK"]').click();
+        });
+
+        const inputHadir = document.getElementById('inputHadir');
+        const displayHadir = document.getElementById('pesan-masuk');
+        const inputPulang = document.getElementById('inputPulang');
+        const displayPulang = document.getElementById('pesan-pulang');
+        let timeoutId;
+
+        inputHadir.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                let result = inputHadir.value.replace(/{nama}/g, "Nur Khoiriah Sitompul");
+                displayHadir.textContent = result; // Show the input value
+            }, 200); // 500 ms
+        });
+
+        inputPulang.addEventListener('input', () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                let result = inputPulang.value.replace(/{nama}/g, "Nur Khoiriah Sitompul");
+                displayPulang.textContent = result; // Show the input value
+            }, 200); // 500 ms
         });
     </script>
 @endsection

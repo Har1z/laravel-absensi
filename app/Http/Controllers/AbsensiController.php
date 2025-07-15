@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use DB;
 use App\Models\Attendance;
 use App\Models\Student;
@@ -10,13 +11,11 @@ use Illuminate\Http\Request;
 
 class AbsensiController extends Controller
 {
-    public function index()
-    {
+    public function index() {
         return view('pages.guru.absen-kehadiran');
     }
 
-    public function absen(Request $request)
-    {
+    public function absen(Request $request) {
         $request->validate([
             'identifier' => 'required|string',
         ]);
@@ -24,50 +23,67 @@ class AbsensiController extends Controller
         // get student data
         $student = Student::where('identifier', $request->identifier)->first();
 
+        // if the student is not found
         if (!$student) {
             return response()->json(['console' => 'Siswa tidak ditemukan'], 404);
         }
 
-        $today = Carbon::today()->toDateString();
+        $setting = Setting::where('unit', $student->unit)->first();
+        $now = now();
+        $status = $now->greaterThan($setting->present_time) ? 'late' : 'present'; // to check if the student are late or not
 
         // check if student has present today
+        $today = Carbon::today()->toDateString();
         $attendance = Attendance::where('student_id', $student->id)
             ->whereDate('date', $today)
             ->first();
 
-            // if hasn't present → do check-in
-            if (!$attendance) {
-                Attendance::create([
-                    'student_id' => $student->id,
-                    'date' => $today,
-                    'check_in_time' => now(),
+        // if hasn't present → do check-in
+        if (!$attendance) {
+            Attendance::create([
+                'student_id' => $student->id,
+                'date' => $today,
+                'check_in_time' => $now,
+                'unit' => $student->unit,
+                'status' => $status, //if $setting->present_time < now() == late
+            ]);
+
+            // send message to parent
+            $message = str_replace('{nama}', $student->name, $setting->in_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+
+            // get count of present, late, absent, total
+            $counts = $this->getStatistics($student->id);
+
+            return response()->json(
+                [
+                    'log' => 'masuk',
+                    'console' => 'Berhasil check-in siswa : ' . $student->name,
+                    'nama' => $student->name,
+                    'profile_pict' => asset('storage/' . $student->profile_pict),
                     'unit' => $student->unit,
-                    'status' => 'present',
+                    'waktu' => $now->format('H:i:s'),
+                    'count_tepat_waktu' => $counts->count_tepat_waktu,
+                    'count_terlambat' => $counts->count_terlambat,
+                    'count_alpa' => $counts->count_alpa,
+                    'count_total' => $counts->count_total,
                 ]);
-
-                // get count of present, late, absent, total
-                $counts = $this->getStatistics($student->id);
-
-                return response()->json(
-                    [
-                        'log' => 'masuk',
-                        'console' => 'Berhasil check-in siswa : ' . $student->name,
-                        'nama' => $student->name,
-                        'profile_pict' => asset('storage/' . $student->profile_pict),
-                        'unit' => $student->unit,
-                        'waktu' => now()->format('H:i:s'),
-                        'count_tepat_waktu' => $counts->count_tepat_waktu,
-                        'count_terlambat' => $counts->count_terlambat,
-                        'count_alpa' => $counts->count_alpa,
-                        'count_total' => $counts->count_total,
-                    ]);
         }
 
         // if already present → check if already check-out
         if (is_null($attendance->check_out_time)) {
             $attendance->update([
-                'check_out_time' => now(),
+                'check_out_time' => $now,
             ]);
+
+            $message = str_replace('{nama}', $student->name, $setting->out_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
 
             // get count of present, late, absent, total
             $counts = $this->getStatistics($student->id);
@@ -79,7 +95,7 @@ class AbsensiController extends Controller
                     'nama' => $student->name,
                     'profile_pict' => asset('storage/' . $student->profile_pict),
                     'unit' => $student->unit,
-                    'waktu' => now()->format('H:i:s'),
+                    'waktu' => $now->format('H:i:s'),
                     'count_tepat_waktu' => $counts->count_tepat_waktu,
                     'count_terlambat' => $counts->count_terlambat,
                     'count_alpa' => $counts->count_alpa,
@@ -91,6 +107,32 @@ class AbsensiController extends Controller
         return response()->json(['console' => 'Sudah check-out hari ini'], 403);
     }
 
+    private function sendMessage(string $message, $phoneNumber) {
+        $dataSending = Array();
+        $dataSending["api_key"] = env('WATZAP_API_KEY');
+        $dataSending["number_key"] = env('WATZAP_NUMBER_KEY');
+        $dataSending["phone_no"] = $phoneNumber;
+        $dataSending["message"] = $message;
+        $dataSending["wait_until_send"] = "1"; //This is an optional parameter, if you use this parameter the response will appear after sending the message is complete
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://api.watzap.id/v1/send_message',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => json_encode($dataSending),
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json'
+        ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        // echo $response;
+    }
 
     // how to make this func automatically run afterschool... uh, I don't know.
     public function markAbsentStudents() {
@@ -128,6 +170,7 @@ class AbsensiController extends Controller
 
     public function getAttendanceLog(){
         $today = Carbon::today()->toDateString();
+        $logHash = [];
 
         $checkInQuery = DB::table('attendances')
             ->join('students', 'attendances.student_id', '=', 'students.id')
@@ -142,7 +185,18 @@ class AbsensiController extends Controller
             ->orderBy('time', 'asc')
             ->get();
 
-        // dd($logs);
-        return response()->json($logs);
+
+            foreach ($logs as $data) {
+                $name = $data->name;
+                $student_id = $data->student_id;
+                $type = $data->type;
+                $time = $data->time;
+
+                if (!empty($time)) {
+                    $logHash[] = $data;
+                }
+            };
+            // dd($logs, $logHash);
+            return response()->json($logHash);
     }
 }

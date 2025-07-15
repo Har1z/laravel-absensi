@@ -46,6 +46,7 @@ class DataSiswaController extends Controller
             'birth' => 'required',
             'gender' => 'required',
             'parent_number' => 'required|numeric',
+            'other_parent_number' => 'nullable|numeric',
             'unit' => 'required',
             'identifier' => 'nullable|unique:students,identifier',
             'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
@@ -56,13 +57,17 @@ class DataSiswaController extends Controller
         if($validatedData['parent_number'][0] == 0) {
             $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
         }
+        if($validatedData['other_parent_number'][0] == 0) {
+            $validatedData['other_parent_number'] = substr($validatedData['other_parent_number'], 1);
+        }
 
         $validatedData['parent_number'] = "+62".$validatedData['parent_number'];
+        $validatedData['other_parent_number'] = "+62".$validatedData['other_parent_number'];
 
         if ($request->hasFile('file')) {
             $file           = $request->file('file');
             $fileOriginName = $file->getClientOriginalName();
-            $profilePict    = str_replace('public/','',$file->storeAs('public/uploads/profile_pict', uniqid()."_".$fileOriginName)); // "uploads/profile_pict" ?
+            $profilePict    = str_replace('public/','',$file->storeAs('uploads/profile_pict', uniqid()."_".$fileOriginName)); // "uploads/profile_pict" ?
         }
 
         $validatedData['profile_pict'] = $profilePict;
@@ -130,6 +135,7 @@ class DataSiswaController extends Controller
             'birth' => 'required',
             'gender' => 'required',
             'parent_number' => 'required|numeric',
+            'other_parent_number' => 'nullable|numeric',
             'unit' => 'required',
             'file' => 'nullable|max:150|image|mimes:png,jpeg,jpg',
             'identifier' => 'required|unique:students,identifier,'.$id,
@@ -166,6 +172,15 @@ class DataSiswaController extends Controller
         $validatedData['parent_number'] = str_replace('+62','',$validatedData['parent_number']);
         if($validatedData['parent_number'][0] == 0) {
             $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
+        }
+
+        if ($validatedData['other_parent_number']) {
+            $validatedData['other_parent_number'] = str_replace('+62','',$validatedData['other_parent_number']);
+            if($validatedData['other_parent_number'][0] == 0) {
+                $validatedData['other_parent_number'] = substr($validatedData['other_parent_number'], 1);
+            }
+
+            $validatedData['other_parent_number'] = "+62".$validatedData['other_parent_number'];
         }
 
         $validatedData['parent_number'] = "+62".$validatedData['parent_number'];

@@ -24,6 +24,7 @@ return new class extends Migration
 
             $table->index('student_id');
             $table->index('date');
+            $table->index('status');
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
         });

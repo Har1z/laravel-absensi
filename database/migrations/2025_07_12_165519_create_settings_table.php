@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('out_message');
             $table->time('present_time');
             $table->timestamps();
+
+            $table->index('unit');
         });
     }
 
