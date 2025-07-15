@@ -141,9 +141,9 @@
                 }
             });
 
-            $(document).on('input', '#input', function () {
-                submitAbsen();
-            });
+            // $(document).on('input', '#input', function () {
+            //     submitAbsen();
+            // });
 
             // Submit manual
             // $('#submitBtn').on('click', function () {

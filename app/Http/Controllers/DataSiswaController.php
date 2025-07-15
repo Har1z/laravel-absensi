@@ -54,10 +54,10 @@ class DataSiswaController extends Controller
 
         $profilePict = null;
 
-        if($validatedData['parent_number'][0] == 0) {
+        if($validatedData['parent_number'] && $validatedData['parent_number'][0] == 0) {
             $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
         }
-        if($validatedData['other_parent_number'][0] == 0) {
+        if($validatedData['other_parent_number'] && $validatedData['other_parent_number'][0] == 0) {
             $validatedData['other_parent_number'] = substr($validatedData['other_parent_number'], 1);
         }
 
@@ -170,13 +170,13 @@ class DataSiswaController extends Controller
         }
 
         $validatedData['parent_number'] = str_replace('+62','',$validatedData['parent_number']);
-        if($validatedData['parent_number'][0] == 0) {
+        if($validatedData['parent_number'] && $validatedData['parent_number'][0] == 0) {
             $validatedData['parent_number'] = substr($validatedData['parent_number'], 1);
         }
 
         if ($validatedData['other_parent_number']) {
             $validatedData['other_parent_number'] = str_replace('+62','',$validatedData['other_parent_number']);
-            if($validatedData['other_parent_number'][0] == 0) {
+            if($validatedData['other_parent_number'] && $validatedData['other_parent_number'][0] == 0) {
                 $validatedData['other_parent_number'] = substr($validatedData['other_parent_number'], 1);
             }
 

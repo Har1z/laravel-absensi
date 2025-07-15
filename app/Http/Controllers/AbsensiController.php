@@ -113,7 +113,7 @@ class AbsensiController extends Controller
         $dataSending["number_key"] = env('WATZAP_NUMBER_KEY');
         $dataSending["phone_no"] = $phoneNumber;
         $dataSending["message"] = $message;
-        $dataSending["wait_until_send"] = "1"; //This is an optional parameter, if you use this parameter the response will appear after sending the message is complete
+        // $dataSending["wait_until_send"] = "1"; //This is an optional parameter, if you use this parameter the response will appear after sending the message is complete
         $curl = curl_init();
         curl_setopt_array($curl, array(
         CURLOPT_URL => 'https://api.watzap.id/v1/send_message',
