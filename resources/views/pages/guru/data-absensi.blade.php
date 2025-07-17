@@ -11,6 +11,28 @@
 @section('custom-style')
     <!-- Custom styles for this page -->
     <link href="{{ asset('css/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <style>
+        .form-select {
+            display: block;
+            width: 100%;
+            padding: .375rem 1.75rem .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #858796;
+            vertical-align: middle;
+            background-color: #fff;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right .75rem center;
+            background-size: 16px 12px;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -68,12 +90,6 @@
                             <td>{{ $item->check_out_time ?? '-' }}</td>
                             <td>-</td>
                             <td>
-                                <a href="#" class="btn btn-warning btn-icon-split btn-sm" title="Edit">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-pencil"></i>
-                                    </span>
-                                    {{-- <span class="text">Edit</span> --}}
-                                </a>
                                 <a class="btn btn-danger btn-icon-split btn-sm" title="Hapus" data-toggle="modal" data-target="#confirmDeleteModal"
                                     data-id='{{ $item->id }}' data-name="{{ $item->student->name }}" data-url="{{ route('data-absensi.destroy', $item->id) }}">
                                     <span class="icon text-white-50">
@@ -81,12 +97,6 @@
                                     </span>
                                     {{-- <span class="text">Delete</span> --}}
                                 </a>
-                                {{-- <a href="#" class="btn btn-success btn-icon-split btn-sm" title="unduh QR">
-                                    <span class="icon text-white-50">
-                                        <i class="fas fa-qrcode"></i>
-                                    </span>
-                                    <span class="text">unduh QR</span>
-                                </a> --}}
                             </td>
                         </tr>
                         @endforeach
@@ -116,6 +126,107 @@
                     <form action="" method="POST" id="deleteForm">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- GET REPORT MODAL --}}
+    <div class="modal" tabindex="-1" id="getReportModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rekap Absen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <a class="btn btn-primary rekap-absen-btn w-100" data-unit="TK">
+                                TK
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SD">
+                                SD
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SMP">
+                                SMP
+                            </a>
+                        </div>
+                        <div class="col-lg-3">
+                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SMK">
+                                SMK
+                            </a>
+                        </div>
+                    </div>
+                    <form action="{{ route('data-absensi.get-report') }}" method="POST">
+                        @csrf
+                        <div class="my-3 mt-5">
+                            <label id="rekap-label" class="form-label h4">TK</label>
+                            <br>
+                            <input type="hidden" name="unit" value="TK" id="rekap-unit">
+                            {{-- <input type="month" name="month" class="form-control" required> --}}
+                            <label for="monthInput" class="form-label">Bulan</label>
+                            <select name="month" class="form-select mb-3" id="monthInput">
+                                @for ($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}">
+                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                @endfor
+                            </select>
+
+                            <label for="yearInput" class="form-label">Tahun</label>
+                            <select name="year" class="form-select" id="yearInput">
+                                @for ($y = 2025; $y <= now()->year; $y++)
+                                    <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-success">
+                                Download
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ABSEN IZIN MODAL --}}
+    <div class="modal" tabindex="-1" id="absenIzinModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Absen Siswa Izin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('absen-izin') }}" method="POST">
+                        @csrf
+                        <div>
+                            {{-- <label id="rekap-label" class="form-label h4">TK</label> --}}
+                            <br>
+                            {{-- <input type="month" name="month" class="form-control" required> --}}
+                            <label for="identifierInput" class="form-label">Kode Absensi</label>
+                            <input name="identifier" class="form-control mb-3 text-gray-900" id="identifierInput" placeholder="xxxxxxxxx_UNIT_Nama_Siswa" required>
+
+                            <label for="noteInput" class="form-label">Keterangan</label>
+                            <input name="note" class="form-control text-gray-900" id="noteInput" placeholder="sakit / izin acara.." required>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-success mt-4">
+                                Simpan
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -160,6 +271,13 @@
             // $('#siswaTable').DataTable();
             var table = $('#siswaTable').DataTable();
 
+            $('#siswaTable_length').prepend(
+                "<a data-toggle='modal' data-target='#getReportModal' class='btn btn-primary btn-icon-split btn-sm mr-2 mb-2' title='Rekap Absen'><span class='icon text-white-50'><i class='fa-solid fa-file-csv'></i></span><span class='text'>Rekap Absen</span></a>"
+            );
+            $('#siswaTable_length').prepend(
+                "<a data-toggle='modal' data-target='#absenIzinModal' class='btn btn-info btn-icon-split btn-sm mr-2 mb-2' title='Absen Siswa'><span class='icon text-white-50'><i class='fa-solid fa-school-circle-xmark'></i></span><span class='text'>Absen Izin</span></a>"
+            );
+
             var filterUnit = "";
 
             function applyFilters() {
@@ -170,6 +288,17 @@
             $('.filter-unit').on('click', function() {
                 filterUnit = $(this).data('unit');
                 $('.filter-unit').removeClass('btn-primary').addClass('btn-secondary');
+                $(this).removeClass('btn-secondary').addClass('btn-primary');
+                applyFilters();
+            });
+
+            $('.rekap-absen-btn').on('click', function() {
+                let currentBtn = $(this);
+
+                $("#rekap-unit").val(currentBtn.attr("data-unit"));
+                $("#rekap-label").text(currentBtn.attr("data-unit"));
+                // filterUnit = $(this).data('unit');
+                $('.rekap-absen-btn').removeClass('btn-primary').addClass('btn-secondary');
                 $(this).removeClass('btn-secondary').addClass('btn-primary');
                 applyFilters();
             });

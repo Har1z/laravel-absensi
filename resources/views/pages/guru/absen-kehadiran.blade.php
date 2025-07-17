@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <div class="col-xl-2 col-lg-2">
+        {{-- <div class="col-xl-2 col-lg-2">
             <div class="stat-card card shadow mb-3 text-center p-2">
                 <h4 class="font-weight-bold mb-3">Laporan Absensi</h4>
 
@@ -109,7 +109,7 @@
                 </div>
 
             </div>
-        </div>
+        </div> --}}
 
 
     </div>
@@ -141,15 +141,6 @@
                 }
             });
 
-            // $(document).on('input', '#input', function () {
-            //     submitAbsen();
-            // });
-
-            // Submit manual
-            // $('#submitBtn').on('click', function () {
-            //     submitAbsen();
-            // });
-
             function submitAbsen() {
                 const id = $('#input').val();
 
@@ -173,10 +164,10 @@
                         $('#unit').text(res.unit);
                         $('#waktu').text(res.waktu);
 
-                        $('#count-tepat-waktu').text(res.count_tepat_waktu);
-                        $('#count-terlambat').text(res.count_terlambat);
-                        $('#count-alpa').text(res.count_alpa);
-                        $('#count-total').text(res.count_total);
+                        // $('#count-tepat-waktu').text(res.count_tepat_waktu);
+                        // $('#count-terlambat').text(res.count_terlambat);
+                        // $('#count-alpa').text(res.count_alpa);
+                        // $('#count-total').text(res.count_total);
 
                         getLog();
                         $('#input').val('');

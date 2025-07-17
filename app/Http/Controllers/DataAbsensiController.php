@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceDataExport;
+use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DataAbsensiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $checkRequest = $request->validate([
+            'date' => 'nullable|date',
+        ]);
 
         $students = Attendance::with('student')->where('date', date('Y-m-d'))->get();
 
@@ -69,5 +75,25 @@ class DataAbsensiController extends Controller
     {
         Attendance::FindOrFail($id)->delete();
         return redirect()->route('data-absensi.index');
+    }
+
+    public function getReport(Request $request) {
+        $validateData = request()->validate([
+            'unit' => 'required|string',
+            'month' => 'required|numeric',
+            'year' => 'required|numeric',
+        ]);
+
+        $unit = $request->unit;
+        $month = $request->month;
+        $year = $request->year;
+        $students = Student::where('unit', $unit)
+            ->with(['attendances' => function ($query) use ($month, $year) {
+                $query->whereMonth('date', $month)
+                      ->whereYear('date', $year);
+        }])->get();
+
+        // dd($data);
+        return Excel::download(new AttendanceDataExport($students, $month, $year), 'rekap_absensi_'.$unit.'.xlsx');
     }
 }

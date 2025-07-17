@@ -38,6 +38,34 @@ class AbsensiController extends Controller
             ->whereDate('date', $today)
             ->first();
 
+        // if hasn't present and the time is past 09.30 → do check-out
+        if (!$attendance && $now->greaterThan('09:30:00')) {
+            Attendance::create([
+                'student_id' => $student->id,
+                'date' => $today,
+                'check_out_time' => $now,
+                'unit' => $student->unit,
+                'status' => 'late', // kind of punishment for forgetting to check-in
+            ]);
+
+            // send message to parent
+            $message = str_replace('{nama}', $student->name, $setting->out_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+
+            return response()->json(
+                [
+                    'log' => 'pulang',
+                    'console' => 'Berhasil check-in siswa : ' . $student->name,
+                    'nama' => $student->name,
+                    'profile_pict' => asset('storage/' . $student->profile_pict),
+                    'unit' => $student->unit,
+                    'waktu' => $now->format('H:i:s'),
+                ]);
+        }
+
         // if hasn't present → do check-in
         if (!$attendance) {
             Attendance::create([
@@ -55,9 +83,6 @@ class AbsensiController extends Controller
                 $this->sendMessage($message, $student->other_parent_number);
             }
 
-            // get count of present, late, absent, total
-            $counts = $this->getStatistics($student->id);
-
             return response()->json(
                 [
                     'log' => 'masuk',
@@ -66,10 +91,6 @@ class AbsensiController extends Controller
                     'profile_pict' => asset('storage/' . $student->profile_pict),
                     'unit' => $student->unit,
                     'waktu' => $now->format('H:i:s'),
-                    'count_tepat_waktu' => $counts->count_tepat_waktu,
-                    'count_terlambat' => $counts->count_terlambat,
-                    'count_alpa' => $counts->count_alpa,
-                    'count_total' => $counts->count_total,
                 ]);
         }
 
@@ -85,9 +106,6 @@ class AbsensiController extends Controller
                 $this->sendMessage($message, $student->other_parent_number);
             }
 
-            // get count of present, late, absent, total
-            $counts = $this->getStatistics($student->id);
-
             return response()->json(
                 [
                     'log' => 'pulang',
@@ -96,15 +114,51 @@ class AbsensiController extends Controller
                     'profile_pict' => asset('storage/' . $student->profile_pict),
                     'unit' => $student->unit,
                     'waktu' => $now->format('H:i:s'),
-                    'count_tepat_waktu' => $counts->count_tepat_waktu,
-                    'count_terlambat' => $counts->count_terlambat,
-                    'count_alpa' => $counts->count_alpa,
-                    'count_total' => $counts->count_total,
             ]);
         }
 
         // if already present and check-out → cannot check-out again
         return response()->json(['console' => 'Sudah check-out hari ini'], 403);
+    }
+
+    public function absenIzin(Request $request) {
+        $request->validate([
+            'identifier' => 'required|string',
+            'note' => 'required|string',
+        ]);
+
+        // get student data
+        $student = Student::where('identifier', $request->identifier)->first();
+
+        // if the student is not found
+        if (!$student) {
+            return response()->json(['console' => 'Siswa tidak ditemukan'], 404);
+        }
+
+        $setting = Setting::where('unit', $student->unit)->first();
+        $now = now();
+
+        // check if student has present today
+        $today = Carbon::today()->toDateString();
+        $attendance = Attendance::where('student_id', $student->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        // if hasn't present → do check-in
+        if (!$attendance) {
+            Attendance::create([
+                'student_id' => $student->id,
+                'date' => $today,
+                'unit' => $student->unit,
+                'status' => 'excused', //if $setting->present_time < now() == late
+            ]);
+
+            return redirect()->back()->with('success', 'Berhasil mengajukan izin');
+        }
+
+        // if already present and check-out → cannot check-out again
+        return redirect()->back()->with('error', 'Sudah mengajukan izin hari ini');
+
     }
 
     private function sendMessage(string $message, $phoneNumber) {

@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 class Student extends Model
 {
 
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
+    }
     public function getFormattedBirthAttribute() {
         return Carbon::parse($this->birth)->format('d F Y');
     }
