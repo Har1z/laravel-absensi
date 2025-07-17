@@ -12,8 +12,8 @@
     <!-- Custom styles for this page -->
     <style>
         .student-photo {
-            width: 26rem;
-            height: 26rem;
+            width: 20rem;
+            height: 20rem;
             border-radius: 50%;
             background-color: #dee2e6;
             /* background-image: url('https://picsum.photos/500'); // use asset later? */
@@ -26,16 +26,13 @@
 
         .log-card {
             overflow-y: auto;
-            height: 32rem;
+            height: 417px;
         }
 
         .info-card {
-            height: 39rem;
+            height: 550px;
         }
 
-        .stat-card {
-            height: 39rem;
-        }
     </style>
 @endsection
 
@@ -46,7 +43,7 @@
 
         <div class="col-xl-4 col-lg-4">
             <!-- Input ID -->
-            <div class="card shadow mb-1 p-2">
+            <div class="card shadow mb-4 p-2">
                 <label for="input" class="form-label font-weight-bold">Nomor ID</label>
                 <input type="text" class="form-control" id="input" autofocus>
                 <p class="text-xs ml-auto mr-2" style="margin-bottom: 0%; margin-top: 2px;"> *Press Enter to Submit</p>
@@ -76,10 +73,10 @@
             </div>
         </div>
 
-        <div class="col-xl-6 col-lg-6">
+        <div class="col-xl-8 col-lg-8">
             <div class="info-card card shadow mb-3 text-center p-2">
                 <img class="student-photo" id="profile_pict" src=""></img>
-                <div class="card bg-success text-white shadow mt-auto p-2">
+                <div class="card text-white shadow mt-auto p-2" style="background-color: purple">
                     <h3 class="font-weight-bold" id="nama">Nama</h3>
                     <h3 class="font-weight-bold" id="unit">unit</h3>
                     <h3 class="font-weight-bold" id="waktu">00:00</h3>

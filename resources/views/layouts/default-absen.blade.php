@@ -34,7 +34,7 @@
                 </div>
             <!-- End of Main Content -->
 
-            @include('partials.footer')
+            {{-- @include('partials.footer') --}}
 
         </div>
         <!-- End of Content Wrapper -->

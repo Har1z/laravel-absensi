@@ -37,7 +37,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
     Route::post('/absensi/getLog', [AbsensiController::class,'getAttendanceLog'])->name('absensi.log');
     Route::post('/absensi', [AbsensiController::class,'absen'])->name('scan');
-    Route::post('/absensi', [AbsensiController::class,'absenIzin'])->name('absen-izin');
+    Route::post('/absensi-izin', [AbsensiController::class,'absenIzin'])->name('absen-izin');
 
     Route::post('/import/student-import', [DataSiswaController::class, 'ImportStudenData'])->name('import.student');
     Route::get('/import/get-template', [DataSiswaController::class, 'GetTemplateData'])->name('import.get-template');

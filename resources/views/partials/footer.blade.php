@@ -1,7 +1,7 @@
 <!-- Footer -->
 <footer class="sticky-footer bg-white">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
+    <div class="container my-2">
+        <div class="copyright text-center">
             <span>Copyright &copy; Lab Attendance 2024</span>
         </div>
     </div>
