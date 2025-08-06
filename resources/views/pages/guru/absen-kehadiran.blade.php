@@ -33,10 +33,42 @@
             height: 550px;
         }
 
+        .loader-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #00af43;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 @endsection
 
 @section('content')
+
+    <!-- Loader -->
+    <div class="loader-overlay d-none" id="loader">
+        <div class="loader"></div>
+    </div>
+
 
     <!-- Content Row -->
     <div class="row">
@@ -111,6 +143,28 @@
 
     </div>
 
+
+    <!-- Notification -->
+    <button type="button" id="notification-btn" class="btn btn-primary d-none" data-toggle="modal" data-target="#notification-modal"></button>
+    <div class="modal fade" id="notification-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="message">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('modal')
@@ -141,6 +195,8 @@
             function submitAbsen() {
                 const id = $('#input').val();
 
+                $("#loader").toggleClass("d-none");
+
                 if (!id) return alert('ID tidak boleh kosong.');
 
                 $.ajax({
@@ -153,6 +209,7 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}' // jika pakai route web
                     },
                     success: function (res) {
+                        $("#loader").toggleClass("d-none");
                         console.log(res);
                         console.log(res.log);
 
@@ -170,7 +227,9 @@
                         $('#input').val('');
                     },
                     error: function (xhr) {
-                        console.log(xhr.responseJSON.console || 'Terjadi kesalahan.');
+                        $("#loader").toggleClass("d-none");
+                        $("#notification-btn").click();
+                        $("#message").text(`${xhr.responseJSON.console || 'Terjadi kesalahan.'}`);
                         $('#input').val('');
                     }
                 });

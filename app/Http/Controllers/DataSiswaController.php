@@ -73,7 +73,7 @@ class DataSiswaController extends Controller
         $validatedData['profile_pict'] = $profilePict;
 
         // check if the identifier is empty (if empty, generate it)
-        if (empty($data['identifier'])) {
+        if (empty($validatedData['identifier'])) {
             $unit   = strtoupper($request->unit); // TK, SD, SMP, SMK
             $name   = preg_replace('/\s+/', '_', $request->name); // replace spasi jadi underscore
             $random = uniqid();
