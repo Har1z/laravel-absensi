@@ -38,8 +38,8 @@ class AbsensiController extends Controller
             ->whereDate('date', $today)
             ->first();
 
-        // if hasn't present and the time is past 09.30 → do check-out
-        if (!$attendance && $now->greaterThan('11:30:00')) {
+        // if hasn't present and the time is past 16.00 → do check-out
+        if (!$attendance && $now->greaterThan('16:00:00')) {
             Attendance::create([
                 'student_id' => $student->id,
                 'date' => $today,
