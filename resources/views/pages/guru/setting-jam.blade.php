@@ -56,9 +56,18 @@
                     <div class="row">
                         <div class="col-12 col-lg-12 mb-3">
 
-                            <div class="mb-3 mt-3">
+                            <div class="mt-3">
                                 <label for="presentTimeInput" class="form-label">Jam Masuk</label>
                                 <input type="time" class="form-control" id="presentTimeInput" name="present_time" value="{{ old('present_time', $item->present_time ?? '') }}" autocomplete="off" required="">
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-lg-12 mb-3">
+
+                            <div class="mb-3">
+                                <label for="outTimeInput" class="form-label">Jam Pulang</label>
+                                <input type="time" class="form-control" id="outTimeInput" name="out_time" value="{{ old('out_time', $item->out_time ?? '') }}" autocomplete="off" required="">
                             </div>
 
                         </div>
