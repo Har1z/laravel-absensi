@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Section;
 use DB;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,39 +14,21 @@ class SettingsSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('settings')->insert([
-            [
-                'unit' => 'TK',
-                'in_message' => 'Pesan Hadir TK',
-                'out_message' => 'Pesan Pulang TK',
+        $sections     = Section::get()->toArray();
+        $dataToInsert = [];
+
+        foreach ($sections as $section) {
+            $dataToInsert[] = [
+                'section_id' => $section['id'],
+                'in_message' => 'Pesan Hadir '.$section['name'],
+                'out_message' => 'Pesan Pulang '.$section['name'],
                 'present_time' => '07:30:00',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-            [
-                'unit' => 'SD',
-                'in_message' => 'Pesan Hadir SD',
-                'out_message' => 'Pesan Pulang SD',
-                'present_time' => '07:00:00',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'unit' => 'SMP',
-                'in_message' => 'Pesan Hadir SMP',
-                'out_message' => 'Pesan Pulang SMP',
-                'present_time' => '07:00:00',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'unit' => 'SMK',
-                'in_message' => 'Pesan Hadir SMK',
-                'out_message' => 'Pesan Pulang SMK',
-                'present_time' => '07:00:00',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+            ];
+        }
+
+
+        DB::table('settings')->insert($dataToInsert);
     }
 }

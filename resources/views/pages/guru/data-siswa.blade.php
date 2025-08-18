@@ -29,10 +29,9 @@
                         <div class="col-12 col-xl-6 col-lg-6 col-md-6">
                             <h6 class="m-0 mb-3 font-weight-bold text-secondary">UNIT</h6>
                             <button class="btn btn-primary filter-unit mb-1" data-unit="">Semua Unit</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="TK">TK</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SD">SD</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SMP">SMP</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SMK">SMK</button>
+                            @foreach ($sections as $section)
+                                <button class="btn btn-secondary filter-unit mb-1" data-unit="{{ $section->name }}">{{ $section->name }}</button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -66,7 +65,7 @@
                         @foreach ($students as $item)
                         <tr>
                             <td>{{ $item->name }}</td>
-                            <td>{{ $item->unit }}</td>
+                            <td>{{ $item->section->name }}</td>
                             <td>{{ $item->formatted_birth }}</td>
                             <td>{{ $item->gender }}</td>
                             <td>{{ $item->identifier ?? '-' }}</td>

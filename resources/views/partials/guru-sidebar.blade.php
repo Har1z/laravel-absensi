@@ -52,6 +52,16 @@
         </a>
     </li>
 
+    <!-- Nav Item - Data Admin -->
+    @if (Session::get('is_superadmin'))
+        <li class="nav-item {{ in_array(Route::current()->getName(), ['data-admin.index', 'data-admin.edit', 'data-admin.create']) ? 'active' :'' }}">
+            <a class="nav-link" href="{{ route('data-admin.index') }}">
+                <i class="fas fa-fw fa-user-check"></i>
+                <span>Data Admin</span>
+            </a>
+        </li>
+    @endif
+
     <!-- Nav Item - QR code -->
     {{-- <li class="nav-item {{ Route::current()->getName() == 'dashboar' ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('dashboard') }}">

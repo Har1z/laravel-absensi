@@ -89,7 +89,7 @@
 
                                         @php
                                             $gender = old('gender', $student->gender ?? '');
-                                            $unit = old('unit', $student->unit ?? '');
+                                            $unit = old('unit', $student->section_id ?? '');
                                         @endphp
                                         <div class="col-5">
                                             <label for="jenisKelaminInput" class="form-label">Jenis Kelamin</label>
@@ -101,11 +101,10 @@
 
                                         <div class="col-7">
                                             <label for="unitInput" class="form-label">Unit</label>
-                                            <select class="form-select" id="unitInput" name="unit">
-                                                <option value="TK" {{ $unit == 'TK' ? 'selected' : '' }}>TK</option>
-                                                <option value="SD" {{ $unit == 'SD' ? 'selected' : '' }}>SD</option>
-                                                <option value="SMP" {{ $unit == 'SMP' ? 'selected' : '' }}>SMP</option>
-                                                <option value="SMK" {{ $unit == 'SMK' ? 'selected' : '' }}>SMK</option>
+                                            <select class="form-select" id="unitInput" name="section_id">
+                                                @foreach ($sections as $section)
+                                                    <option value="{{ $section['id'] }}" {{ $unit == $section['id'] ? 'selected' : '' }}>{{ $section['name'] }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DataAbsensiController;
+use App\Http\Controllers\DataAdminController;
 use App\Http\Middleware\AuthMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
@@ -30,7 +31,7 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
-Route::middleware([AuthMiddleware::class])->group(function () {
+Route::middleware([AuthMiddleware::class, 'role_injector'])->group(function () {
 
     Route::get('/dashboard', [GuruController::class,'index'])->name('dashboard');
 
@@ -47,6 +48,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::resource('/data-siswa', DataSiswaController::class);
     Route::resource('/data-absensi', DataAbsensiController::class);
+    Route::resource('/data-admin', DataAdminController::class)->middleware('check.superadminonly');
 
     // i really want to make it using resource but i'll do normal route since there's no create method ::))
     Route::get('/jam-masuk', [SettingController::class, 'attendanceTime'])->name('setting.attendance-time');

@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('section_id');
+            $table->foreign('section_id')->references('id')->on('sections')->onDelete('cascade');
             $table->string('name');
-            $table->enum('unit', ['TK', 'SD', 'SMP', 'SMK']);
             $table->string('profile_pict')->nullable();
             $table->date('birth');
             $table->string('gender');

@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Exports\GetTemplateExport;
 use App\Imports\StudentImport;
+use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Student;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -19,11 +21,18 @@ class DataSiswaController extends Controller
      */
     public function index()
     {
-        $students = Student::all();
+        if (Session::get('is_superadmin')) {
+            $students = Student::with(['section'])->get();
+            $sections = Section::all();
+        } else {
+            $students = Student::whereIn('section_id', Session::get('section_ids'))->get();
+            $sections = Section::whereIn('id', Session::get('section_ids'))->get();
+        }
 
         // dd($students);
         $data = [
-            'students' => $students
+            'students' => $students,
+            'sections' => $sections,
         ];
         return view('pages.guru.data-siswa', $data);
     }
@@ -33,7 +42,15 @@ class DataSiswaController extends Controller
      */
     public function create()
     {
-        return view('pages.guru.data-siswa-form');
+        if (Session::get('is_superadmin')) {
+            $sections = Section::get()->toArray();
+        } else {
+            $sections = Section::whereIn('id', Session::get('section_ids'))->get()->toArray();
+        }
+        $data = [
+            'sections' => $sections
+        ];
+        return view('pages.guru.data-siswa-form', $data);
     }
 
     /**
@@ -47,9 +64,9 @@ class DataSiswaController extends Controller
             'gender' => 'required',
             'parent_number' => 'required|numeric',
             'other_parent_number' => 'nullable|numeric',
-            'unit' => 'required',
+            'section_id' => 'required',
             'identifier' => 'nullable|unique:students,identifier',
-            'file' => 'nullable|image|mimes:png,jpeg,jpg|max:150',
+            'file' => 'nullable|image|max:150',
         ]);
 
         $profilePict = null;
@@ -113,12 +130,14 @@ class DataSiswaController extends Controller
      */
     public function edit(string $id)
     {
+        $sections = Section::all();
         $student = Student::FindOrFail($id);
         $studentPict = Storage::disk('public')->exists($student->profile_pict ?? 'NONE')
                 ? asset('storage/'.$student->profile_pict)
                 : null; // Ganti Null jadi default image kalo kosong
 
         $data = [
+            'sections'    => $sections,
             'student'     => $student,
             'studentPict' => $studentPict,
         ];
@@ -136,8 +155,8 @@ class DataSiswaController extends Controller
             'gender' => 'required',
             'parent_number' => 'required|numeric',
             'other_parent_number' => 'nullable|numeric',
-            'unit' => 'required',
-            'file' => 'nullable|max:150|image|mimes:png,jpeg,jpg',
+            'section_id' => 'required',
+            'file' => 'nullable|max:150|image',
             'identifier' => 'required|unique:students,identifier,'.$id,
         ]);
 
