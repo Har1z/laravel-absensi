@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Exports\AttendanceDataExport;
+use App\Models\Section;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Facades\Excel;
 
 class DataAbsensiController extends Controller
@@ -20,10 +22,24 @@ class DataAbsensiController extends Controller
             'date' => 'nullable|date',
         ]);
 
-        $students = Attendance::with('student')->where('date', date('Y-m-d'))->get();
+        if (Session::get('is_superadmin')) {
+            $sections = Section::get()->toArray();;
+        } else {
+            $sections = Section::whereIn('id', Session::get('section_ids'))->get()->toArray();
+        }
+
+        $students = Attendance::with('student')
+            ->where('date', date('Y-m-d'));
+
+        if (!Session::get('is_superadmin')) {
+            $students = $students->whereHas('student', fn($q) => $q->whereIn('section_id', Session::get('section_ids')));
+        }
+
+        $students = $students->get();
 
         $data = [
             'students' => $students,
+            'sections' => $sections,
         ];
         return view('pages.guru.data-absensi', $data);
     }
@@ -79,7 +95,7 @@ class DataAbsensiController extends Controller
 
     public function getReport(Request $request) {
         $validateData = request()->validate([
-            'unit' => 'required|string',
+            'unit' => 'required',
             'month' => 'required|numeric',
             'year' => 'required|numeric',
         ]);
@@ -87,13 +103,15 @@ class DataAbsensiController extends Controller
         $unit = $request->unit;
         $month = $request->month;
         $year = $request->year;
-        $students = Student::where('unit', $unit)
+
+        $section = Section::find($unit);
+        $students = Student::where('section_id', $unit)
             ->with(['attendances' => function ($query) use ($month, $year) {
                 $query->whereMonth('date', $month)
                       ->whereYear('date', $year);
         }])->get();
 
         // dd($data);
-        return Excel::download(new AttendanceDataExport($students, $month, $year), 'rekap_absensi_'.$unit.'.xlsx');
+        return Excel::download(new AttendanceDataExport($students, $month, $year), 'rekap_absensi_'.$section->name.'.xlsx');
     }
 }

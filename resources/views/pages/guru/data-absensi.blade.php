@@ -51,10 +51,9 @@
                         <div class="col-12 col-xl-6 col-lg-6 col-md-6">
                             <h6 class="m-0 mb-3 font-weight-bold text-secondary">UNIT</h6>
                             <button class="btn btn-primary filter-unit mb-1" data-unit="">Semua Unit</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="TK">TK</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SD">SD</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SMP">SMP</button>
-                            <button class="btn btn-secondary filter-unit mb-1" data-unit="SMK">SMK</button>
+                            @foreach ($sections as $section)
+                                <button class="btn btn-secondary filter-unit mb-1" data-unit="{{ $section['name'] }}">{{ $section['name'] }}</button>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -133,71 +132,60 @@
     </div>
 
     {{-- GET REPORT MODAL --}}
-    <div class="modal" tabindex="-1" id="getReportModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Rekap Absen</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <a class="btn btn-primary rekap-absen-btn w-100" data-unit="TK">
-                                TK
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SD">
-                                SD
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SMP">
-                                SMP
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-secondary rekap-absen-btn w-100" data-unit="SMK">
-                                SMK
-                            </a>
-                        </div>
+    @if (count($sections) > 0)
+        <div class="modal" tabindex="-1" id="getReportModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Rekap Absen</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <form action="{{ route('data-absensi.get-report') }}" method="POST">
-                        @csrf
-                        <div class="my-3 mt-5">
-                            <label id="rekap-label" class="form-label h4">TK</label>
-                            <br>
-                            <input type="hidden" name="unit" value="TK" id="rekap-unit">
-                            {{-- <input type="month" name="month" class="form-control" required> --}}
-                            <label for="monthInput" class="form-label">Bulan</label>
-                            <select name="month" class="form-select mb-3" id="monthInput">
-                                @for ($m = 1; $m <= 12; $m++)
-                                    <option value="{{ $m }}">
-                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
-                                    </option>
-                                @endfor
-                            </select>
+                    <div class="modal-body">
+                        <div class="row">
+                            @foreach ($sections as $section)
+                                <div class="col-lg-3">
+                                    <a class="btn btn-primary rekap-absen-btn w-100" data-unit="{{ $section['name'] }}" data-unit-id="{{ $section['id'] }}">
+                                        {{ $section['name'] }}
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
+                        <form action="{{ route('data-absensi.get-report') }}" method="POST">
+                            @csrf
+                            <div class="my-3 mt-5">
+                                <label id="rekap-label" class="form-label h4">{{ $sections[0]['name'] }}</label>
+                                <br>
+                                <input type="hidden" name="unit" value="{{ $sections[0]['id'] }}" id="rekap-unit">
+                                {{-- <input type="month" name="month" class="form-control" required> --}}
+                                <label for="monthInput" class="form-label">Bulan</label>
+                                <select name="month" class="form-select mb-3" id="monthInput">
+                                    @for ($m = 1; $m <= 12; $m++)
+                                        <option value="{{ $m }}">
+                                            {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                        </option>
+                                    @endfor
+                                </select>
 
-                            <label for="yearInput" class="form-label">Tahun</label>
-                            <select name="year" class="form-select" id="yearInput">
-                                @for ($y = 2025; $y <= now()->year; $y++)
-                                    <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-success">
-                                Download
-                            </button>
-                        </div>
-                    </form>
+                                <label for="yearInput" class="form-label">Tahun</label>
+                                <select name="year" class="form-select" id="yearInput">
+                                    @for ($y = 2025; $y <= now()->year; $y++)
+                                        <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-success">
+                                    Download
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     {{-- ABSEN IZIN MODAL --}}
     <div class="modal" tabindex="-1" id="absenIzinModal">
@@ -295,7 +283,7 @@
             $('.rekap-absen-btn').on('click', function() {
                 let currentBtn = $(this);
 
-                $("#rekap-unit").val(currentBtn.attr("data-unit"));
+                $("#rekap-unit").val(currentBtn.attr("data-unit-id"));
                 $("#rekap-label").text(currentBtn.attr("data-unit"));
                 // filterUnit = $(this).data('unit');
                 $('.rekap-absen-btn').removeClass('btn-primary').addClass('btn-secondary');
