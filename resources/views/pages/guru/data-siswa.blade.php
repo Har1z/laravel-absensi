@@ -127,55 +127,44 @@
     </div>
 
     {{-- IMPORT DATA MODAL --}}
-    <div class="modal" tabindex="-1" id="import-data">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Import Data</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <a class="btn btn-primary import-data-btn w-100" data-unit="TK">
-                                TK
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-primary import-data-btn w-100" data-unit="SD">
-                                SD
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-primary import-data-btn w-100" data-unit="SMP">
-                                SMP
-                            </a>
-                        </div>
-                        <div class="col-lg-3">
-                            <a class="btn btn-primary import-data-btn w-100" data-unit="SMK">
-                                SMK
-                            </a>
-                        </div>
+    @if ($sections->count() > 0)
+        <div class="modal" tabindex="-1" id="import-data">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Data</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <form action="{{ route('import.student') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="my-3 mt-5">
-                            <label id="import-label" class="form-label h4">TK</label>
-                            <input type="hidden" name="unit" value="TK" id="import-unit">
-                            <input type="file" name="file" id="file-preview" class="filepond">
+                    <div class="modal-body">
+                        <div class="row">
+                            @foreach ($sections->toArray() as $item)
+                            <div class="col-lg-3">
+                                <a class="btn btn-primary import-data-btn w-100" data-unit="{{ $item['name'] }}" data-unit-id="{{ $item['id'] }}">
+                                    {{ $item['name'] }}
+                                </a>
+                            </div>
+                            @endforeach
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-success">
-                                Kirim
-                            </button>
-                        </div>
-                    </form>
+                        <form action="{{ route('import.student') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="my-3 mt-5">
+                                <label id="import-label" class="form-label h4">{{ $sections->toArray()[0]['name'] }}</label>
+                                <input type="hidden" name="unit" value="{{ $sections->toArray()[0]['id'] }}" id="import-unit">
+                                <input type="file" name="file" id="file-preview" class="filepond">
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-success">
+                                    Kirim
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 @endsection
 
 @section('custom-scripts')
@@ -242,7 +231,7 @@
             $(".import-data-btn").on("click", function() {
                 let currentBtn = $(this);
 
-                $("#import-unit").val(currentBtn.attr("data-unit"));
+                $("#import-unit").val(currentBtn.attr("data-unit-id"));
                 $("#import-label").text(currentBtn.attr("data-unit"));
             });
 

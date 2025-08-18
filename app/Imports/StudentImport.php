@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\Section;
 use App\Models\Student;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -10,10 +11,16 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class StudentImport implements ToCollection
 {
+    protected $section_id;
     protected $unit;
 
-    public function __construct($unit) {
-        $this->unit = $unit;
+    public function __construct($section_id) {
+        $this->section_id = $section_id;
+        $section = Section::find($section_id);
+        $this->unit = 'NO_UNIT';
+        if ($section) {
+            $this->unit = $section->name;
+        }
     }
     /**
     * @param Collection $collection
@@ -57,7 +64,7 @@ class StudentImport implements ToCollection
 
             $newData = [
                 'name'          => $row[0],
-                'unit'          => $this->unit,
+                'section_id'    => $this->section_id,
                 'birth'         => $birthDate,
                 'gender'        => $row[2],
                 'parent_number' => "+62".$row[3],
