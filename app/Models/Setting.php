@@ -16,4 +16,9 @@ class Setting extends Model
         'out_time',
         'updated_at',
     ];
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class, 'section_id', 'id');
+    }
 }

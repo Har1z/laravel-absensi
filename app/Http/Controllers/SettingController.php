@@ -10,12 +10,14 @@ class SettingController extends Controller
 {
     // show kelola jam masuk tab
     public function attendanceTime() {
-        $settings = Setting::select('id', 'unit', 'present_time', 'out_time')->get();
+        $settings = Setting::select('id', 'section_id', 'present_time', 'out_time')->with('section')->get();
 
-        $data = [
-            'settings' => $settings,
-        ];
-        return view('pages.guru.setting-jam', $data);
+        $data = [];
+        foreach ($settings as $setting) {
+            $data[$setting->section->name] = $setting;
+        }
+
+        return view('pages.guru.setting-jam', compact('data'));
     }
 
     // update jam masuk
@@ -34,11 +36,11 @@ class SettingController extends Controller
 
     // show kelola pesan tab
     public function attendanceMessage() {
-        $settings = Setting::select('id', 'unit', 'in_message', 'out_message')->get();
+        $settings = Setting::with('section')->get();
 
         $data = [];
         foreach ($settings as $setting) {
-            $data[$setting->unit] = $setting;
+            $data[$setting->section->name] = $setting;
         }
 
         return view('pages.guru.setting-pesan', compact('data'));

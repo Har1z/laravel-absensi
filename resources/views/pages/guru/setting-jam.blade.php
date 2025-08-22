@@ -43,22 +43,22 @@
     <!-- Content Row -->
     <div class="row">
 
-        @foreach ($settings as $item)
+        @foreach ($data as $unit => $setting)
         <div class="col-xl-3 col-lg-3">
             <div class="bg-white shadow mb-4 p-3">
                 <div class="card-body">
 
-                    <h3>{{ $item->unit }}</h3>
+                    <h3>{{ $unit }}</h3>
 
                     <form action="{{ route('setting.attendance-time') }}" method="POST">
                     @csrf
-                    <input type="text" name="id" value="{{ $item->id }}" hidden>
+                    <input type="text" name="id" value="{{ $setting->id }}" hidden>
                     <div class="row">
                         <div class="col-12 col-lg-12 mb-3">
 
                             <div class="mt-3">
                                 <label for="presentTimeInput" class="form-label">Jam Masuk</label>
-                                <input type="time" class="form-control" id="presentTimeInput" name="present_time" value="{{ old('present_time', $item->present_time ?? '') }}" autocomplete="off" required="">
+                                <input type="time" class="form-control" id="presentTimeInput" name="present_time" value="{{ old('present_time', $setting->present_time ?? '') }}" autocomplete="off" required="">
                             </div>
 
                         </div>
@@ -67,7 +67,7 @@
 
                             <div class="mb-3">
                                 <label for="outTimeInput" class="form-label">Jam Pulang</label>
-                                <input type="time" class="form-control" id="outTimeInput" name="out_time" value="{{ old('out_time', $item->out_time ?? '') }}" autocomplete="off" required="">
+                                <input type="time" class="form-control" id="outTimeInput" name="out_time" value="{{ old('out_time', $setting->out_time ?? '') }}" autocomplete="off" required="">
                             </div>
 
                         </div>
