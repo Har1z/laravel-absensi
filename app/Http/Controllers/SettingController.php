@@ -8,8 +8,9 @@ use App\Models\Setting;
 
 class SettingController extends Controller
 {
+    // show kelola jam masuk tab
     public function attendanceTime() {
-        $settings = Setting::select('id', 'unit', 'present_time')->get();
+        $settings = Setting::select('id', 'unit', 'present_time', 'out_time')->get();
 
         $data = [
             'settings' => $settings,
@@ -17,9 +18,12 @@ class SettingController extends Controller
         return view('pages.guru.setting-jam', $data);
     }
 
+    // update jam masuk
     public function updateAttendanceTime(Request $request) {
         $request->validate([
+            'id' => 'required',
             'present_time' => 'required',
+            'out_time' => 'required',
         ]);
 
         $setting = Setting::findOrFail($request->id);
@@ -28,6 +32,7 @@ class SettingController extends Controller
         return redirect()->route('setting.attendance-time');
     }
 
+    // show kelola pesan tab
     public function attendanceMessage() {
         $settings = Setting::select('id', 'unit', 'in_message', 'out_message')->get();
 
@@ -39,6 +44,7 @@ class SettingController extends Controller
         return view('pages.guru.setting-pesan', compact('data'));
     }
 
+    // update pesan
     public function updateAttendanceMessage(Request $request) {
         $request->validate([
             'id' => 'required',

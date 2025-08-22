@@ -23,6 +23,7 @@ class SettingsSeeder extends Seeder
                 'in_message' => 'Pesan Hadir '.$section['name'],
                 'out_message' => 'Pesan Pulang '.$section['name'],
                 'present_time' => '07:30:00',
+                'out_time' => '11:30:00',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

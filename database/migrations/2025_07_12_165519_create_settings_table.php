@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('in_message');
             $table->text('out_message');
             $table->time('present_time');
+            $table->time('out_time');
             $table->timestamps();
 
             $table->index('id');

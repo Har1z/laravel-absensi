@@ -13,6 +13,7 @@ class Setting extends Model
         'in_message',
         'out_message',
         'present_time',
+        'out_time',
         'updated_at',
     ];
 }
