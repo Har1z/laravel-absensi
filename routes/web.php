@@ -38,6 +38,8 @@ Route::middleware([AuthMiddleware::class, 'role_injector'])->group(function () {
     Route::get('/absensi', [AbsensiController::class,'index'])->name('absensi');
     Route::post('/absensi/getLog', [AbsensiController::class,'getAttendanceLog'])->name('absensi.log');
     Route::post('/absensi', [AbsensiController::class,'absen'])->name('scan');
+    Route::get('/absensi-pulang', [AbsensiController::class,'indexPulang'])->name('absensi.pulang');
+    Route::post('/absensi-pulang', [AbsensiController::class,'absenPulang'])->name('scan.pulang');
     Route::post('/absensi-izin', [AbsensiController::class,'absenIzin'])->name('absen-izin');
 
     Route::post('/import/student-import', [DataSiswaController::class, 'ImportStudenData'])->name('import.student');

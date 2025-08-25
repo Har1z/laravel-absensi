@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
+use App\models\Section;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Session;
 
 class SettingController extends Controller
 {
     // show kelola jam masuk tab
     public function attendanceTime() {
-        $settings = Setting::select('id', 'section_id', 'present_time', 'out_time')->with('section')->get();
+        if (Session::get('is_superadmin')) {
+            $settings = Setting::with(['section'])->get();
+            $sections = Section::all();
+        } else {
+            $settings = Setting::whereIn('section_id', Session::get('section_ids'))->get();
+            $sections = Section::whereIn('id', Session::get('section_ids'))->get();
+        }
 
         $data = [];
         foreach ($settings as $setting) {
@@ -36,7 +44,13 @@ class SettingController extends Controller
 
     // show kelola pesan tab
     public function attendanceMessage() {
-        $settings = Setting::with('section')->get();
+        if (Session::get('is_superadmin')) {
+            $settings = Setting::with(['section'])->get();
+            $sections = Section::all();
+        } else {
+            $settings = Setting::whereIn('section_id', Session::get('section_ids'))->get();
+            $sections = Section::whereIn('id', Session::get('section_ids'))->get();
+        }
 
         $data = [];
         foreach ($settings as $setting) {

@@ -6,6 +6,7 @@ use App\Models\Setting;
 use DB;
 use App\Models\Attendance;
 use App\Models\Student;
+use App\Models\Section;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -13,6 +14,10 @@ class AbsensiController extends Controller
 {
     public function index() {
         return view('pages.guru.absen-kehadiran');
+    }
+
+    public function indexPulang() {
+        return view('pages.guru.absen-pulang');
     }
 
     public function absen(Request $request) {
@@ -28,9 +33,10 @@ class AbsensiController extends Controller
             return response()->json(['console' => 'Siswa tidak ditemukan'], 404);
         }
 
-        $setting = Setting::where('unit', $student->unit)->first();
+        $setting = Setting::where('section_id', $student->section_id)->first();
         $now = now();
         $status = $now->greaterThan($setting->present_time) ? 'late' : 'present'; // to check if the student are late or not
+        $unit = Section::find($student->section_id)->name;
 
         // check if student has present today
         $today = Carbon::today()->toDateString();
@@ -44,7 +50,7 @@ class AbsensiController extends Controller
                 'student_id' => $student->id,
                 'date' => $today,
                 'check_out_time' => $now,
-                'unit' => $student->unit,
+                'unit' => $unit,
                 'status' => 'late', // kind of punishment for forgetting to check-in
             ]);
 
@@ -61,7 +67,7 @@ class AbsensiController extends Controller
                     'console' => 'Berhasil check-in siswa : ' . $student->name,
                     'nama' => $student->name,
                     'profile_pict' => asset('storage/' . $student->profile_pict),
-                    'unit' => $student->unit,
+                    'unit' => $unit,
                     'waktu' => $now->format('H:i:s'),
                 ]);
         }
@@ -72,7 +78,7 @@ class AbsensiController extends Controller
                 'student_id' => $student->id,
                 'date' => $today,
                 'check_in_time' => $now,
-                'unit' => $student->unit,
+                'unit' => $unit,
                 'status' => $status, //if $setting->present_time < now() == late
             ]);
 
@@ -112,13 +118,186 @@ class AbsensiController extends Controller
                     'console' => 'Berhasil check-out siswa : ' . $student->name,
                     'nama' => $student->name,
                     'profile_pict' => asset('storage/' . $student->profile_pict),
-                    'unit' => $student->unit,
+                    'unit' => $unit,
                     'waktu' => $now->format('H:i:s'),
             ]);
         }
 
         // if already present and check-out → cannot check-out again
         return response()->json(['console' => 'Sudah check-out hari ini'], 403);
+    }
+
+    public function absenPulang(Request $request) {
+        $request->validate([
+            'identifier' => 'required',
+        ]);
+
+        // get student data
+        $student = Student::where('identifier', $request->identifier)->first();
+        response()->json(['console' => $student], 200);
+
+        // if the student is not found
+        if (!$student) {
+            return response()->json(
+                [
+                    'msg' => 'Data tidak ditemukan',
+                    'color' => 'danger',
+                    'console' => 'Siswa dengan identifier tersebut tidak ditemukan',
+                ], 404);
+        }
+
+        $setting = Setting::where('section_id', $student->section_id)->first();
+        $now = now();
+        $status = $now->greaterThan($setting->present_time) ? 'late' : 'present'; // to check if the student are late or not
+        $unit = Section::find($student->section_id)->name;
+
+        // check if student has present today
+        $today = Carbon::today()->toDateString();
+        $attendance = Attendance::where('student_id', $student->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            Attendance::create([
+                'student_id' => $student->id,
+                'date' => $today,
+                'check_out_time' => $now,
+                'unit' => $unit,
+                'status' => $status, //if $setting->present_time < now() == late
+            ]);
+
+            // send message to parent
+            $message = str_replace('{nama}', $student->name, $setting->in_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+
+            return response()->json(
+                [
+                    'msg' => 'Berhasil Absen Pulang',
+                    'color' => 'warning',
+                    'console' => 'Berhasil Absen Pulang : ' . $student->name,
+                    'nama' => $student->name,
+                    'unit' => $unit,
+                    'pulang' => $now->format('H:i:s'),
+                ]);
+        }
+
+        // if already present → check if already check-out
+        if (is_null($attendance->check_out_time)) {
+            $attendance->update([
+                'check_out_time' => $now,
+            ]);
+
+            $message = str_replace('{nama}', $student->name, $setting->out_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+
+            return response()->json(
+                [
+                    'msg' => 'Berhasil Absen Pulang',
+                    'color' => 'warning',
+                    'console' => 'Berhasil Absen Pulang : ' . $student->name,
+                    'nama' => $student->name,
+                    'unit' => $unit,
+                    'masuk' => $attendance->check_in_time,
+                    'pulang' => $now->format('H:i:s'),
+                ], 200);
+        }
+
+
+        // if already present and check-out → cannot check-out again
+        return response()->json([
+            'msg' => 'Sudah Absen Pulang',
+            'color' => 'danger',
+            'console' => 'Sudah Absen Pulang Hari Ini',
+            'nama' => $student->name,
+            'unit' => $unit,
+            'masuk' => $attendance->check_in_time,
+            'pulang' => $attendance->check_out_time,
+        ], 200);
+    }
+
+
+    public function absenPulangbaru(Request $request) {
+        $request->validate([
+            'identifier' => 'required',
+        ]);
+
+        // get student data
+        $student = Student::where('identifier', $request->identifier)->first();
+
+        // if the student is not found
+        if (!$student) {
+            return response()->json(['console' => 'Siswa tidak ditemukan'], );
+        }
+
+        $setting = Setting::where('section_id', $student->section_id)->first();
+        $now = now();
+        $status = $now->greaterThan($setting->present_time) ? 'late' : 'present'; // to check if the student are late or not
+        $unit = Section::find($student->section_id)->name;
+
+        // check if student has present today
+        $today = Carbon::today()->toDateString();
+        $attendance = Attendance::where('student_id', $student->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            Attendance::create([
+                'student_id' => $student->id,
+                'date' => $today,
+                'check_out_time' => $now,
+                'unit' => $unit,
+                'status' => $status, //if $setting->present_time < now() == late
+            ]);
+
+            // send message to parent
+            $message = str_replace('{nama}', $student->name, $setting->in_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+
+            return response()->json(
+                [
+                    'msg' => 'Berhasil Absen Pulang',
+                    'color' => 'warning',
+                    'console' => 'Berhasil Absen Pulang : ' . $student->name,
+                    'nama' => $student->name,
+                    'unit' => $unit,
+                    'pulang' => $now->format('H:i:s'),
+                ], 200);
+        }
+
+        // if already present → check if already check-out
+        if (is_null($attendance->check_out_time)) {
+            // $attendance->update([
+            //     'check_out_time' => $now,
+            // ]);
+
+            $message = str_replace('{nama}', $student->name, $setting->out_message);
+            $this->sendMessage($message, $student->parent_number);
+            if (!empty($student->other_parent_number)) {
+                $this->sendMessage($message, $student->other_parent_number);
+            }
+            // return response()->json(['console' => "bisa!" . $student->name . $unit . $status ], 200);
+
+            return response()->json(
+                [
+                    'msg' => 'Berhasil Absen Pulang',
+                    'color' => 'warning',
+                    'console' => 'Berhasil Absen Pulang : ' . $student->name,
+                    'nama' => $student->name,
+                    'unit' => $unit,
+                    'masuk' => $attendance->check_in_time,
+                    'pulang' => $now->format('H:i:s'),
+                ], 200);
+        }
+
     }
 
     public function absenIzin(Request $request) {

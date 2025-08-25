@@ -98,7 +98,7 @@
     <li class="nav-item {{ Route::current()->getName() == 'setting-attendance-time' ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('setting.attendance-time') }}">
             <i class="fas fa-fw fa-clock"></i>
-            <span>Kelola Jam Masuk</span>
+            <span>Kelola Jam Sekolah</span>
         </a>
     </li>
 

@@ -70,23 +70,25 @@
             </a>
         </div>
 
-        <!-- pengaturan pesan Card -->
-        {{-- <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Kelola pesan</div>
-                            <div class="h7 mb-0 font-weight-bold text-gray-800">Atur text yang dikirim</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+        <!-- scan QR Pulang Card -->
+        <div class="col-xl-3 col-md-6 mb-4" style="user-select: none;">
+            <a href="{{ route('absensi.pulang') }}" style="text-decoration: none;">
+                <div class="card border-left-secondary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                    Scan QR (kamera)</div>
+                                <div class="h7 mb-0 font-weight-bold text-gray-800">Absen pulang</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-camera fa-2x text-gray-300"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div> --}}
+            </a>
+        </div>
 
     </div>
 @endsection
