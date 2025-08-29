@@ -51,6 +51,7 @@
         </div>
 
         <!-- scan QR Card -->
+        @if (session('is_superadmin'))
         <div class="col-xl-3 col-md-6 mb-4" style="user-select: none;">
             <a href="{{ route('absensi') }}" style="text-decoration: none;">
                 <div class="card border-left-warning shadow h-100 py-2">
@@ -69,6 +70,7 @@
                 </div>
             </a>
         </div>
+        @endif
 
         <!-- scan QR Pulang Card -->
         <div class="col-xl-3 col-md-6 mb-4" style="user-select: none;">
