@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use App\Models\Attendance;
 
 class GuruController extends Controller
 {
@@ -13,12 +14,17 @@ class GuruController extends Controller
         // take data from database
         if (Session::get('is_superadmin')) {
             $studentCount = DB::table('students')->count();
+            $attendanceCount = Attendance::with('student')
+                ->where('date', now()->toDateString())
+                ->count();
         } else {
             $studentCount = DB::table('students')
                 ->whereIn('section_id', Session::get('section_ids'))
                 ->count();
+            $attendanceCount = Attendance::whereDate('date', now())
+                ->whereHas('student', fn($student) => $student->whereIn('section_id', Session::get('section_ids')))
+                ->count();
         }
-        $attendanceCount = DB::table('attendances')->where('date', now()->toDateString())->count();
         $data = [
             'studentCount' => $studentCount,
             'attendanceCount' => $attendanceCount,
