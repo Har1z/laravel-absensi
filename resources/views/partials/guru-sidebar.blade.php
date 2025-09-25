@@ -39,7 +39,7 @@
     <!-- Nav Item - Absensi Siswa -->
     <li class="nav-item {{ Route::current()->getName() == 'data-absensi.index' ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('data-absensi.index') }}">
-            <i class="fas fa-fw fa-user-group"></i>
+            <i class="fas fa-fw fa-user-check"></i>
             <span>Data Absensi</span>
         </a>
     </li>
@@ -47,7 +47,7 @@
     <!-- Nav Item - Data Siswa -->
     <li class="nav-item {{ in_array(Route::current()->getName(), ['data-siswa.index', 'data-siswa.edit', 'data-siswa.create']) ? 'active' :'' }}">
         <a class="nav-link" href="{{ route('data-siswa.index') }}">
-            <i class="fas fa-fw fa-user-check"></i>
+            <i class="fas fa-fw fa-user-group"></i>
             <span>Data Siswa</span>
         </a>
     </li>
@@ -56,7 +56,7 @@
     @if (Session::get('is_superadmin'))
         <li class="nav-item {{ in_array(Route::current()->getName(), ['data-admin.index', 'data-admin.edit', 'data-admin.create']) ? 'active' :'' }}">
             <a class="nav-link" href="{{ route('data-admin.index') }}">
-                <i class="fas fa-fw fa-user-check"></i>
+                <i class="fas fa-fw fa-user-group"></i>
                 <span>Data Admin</span>
             </a>
         </li>

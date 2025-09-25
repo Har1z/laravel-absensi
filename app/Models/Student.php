@@ -27,6 +27,8 @@ class Student extends Model
         'gender',
         'parent_number',
         'other_parent_number',
+        'grade',
+        'major',
         'email',
         'identifier',
         'profile_pict',

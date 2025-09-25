@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('profile_pict')->nullable();
             $table->date('birth');
+            $table->enum('grade', ['A', 'B', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'])->nullable();
+            $table->enum('major', ['KEC', 'KPR', 'TKJ', 'RPL'])->nullable();
             $table->string('gender');
             $table->string('parent_number');
             $table->string('other_parent_number')->nullable();

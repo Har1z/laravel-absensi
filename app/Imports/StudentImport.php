@@ -67,11 +67,33 @@ class StudentImport implements ToCollection
                 'section_id'    => $this->section_id,
                 'birth'         => $birthDate,
                 'gender'        => $row[2],
-                'parent_number' => "+62".$row[3],
+                'parent_number' => normalizePhoneNumber($row[3]),
                 'identifier'    => $row[4],
             ];
 
             Student::create($newData);
         }
+    }
+}
+
+function normalizePhoneNumber($number) {
+    // Hilangkan spasi, strip, titik
+    $number = preg_replace('/[\s\.\-]/', '', $number);
+
+    if (strpos($number, '+62') === 0) {
+        // Sudah format +62...
+        return $number;
+    } elseif (strpos($number, '62') === 0) {
+        // Sudah format 62..., tambahkan +
+        return '+'.$number;
+    } elseif (strpos($number, '0') === 0) {
+        // Format 08..., ganti 0 dengan +62
+        return '+62'.substr($number, 1);
+    } elseif (strpos($number, '8') === 0) {
+        // Format 8..., tambahkan +62
+        return '+62'.$number;
+    } else {
+        // Jika tidak sesuai aturan, kembalikan apa adanya
+        return $number;
     }
 }

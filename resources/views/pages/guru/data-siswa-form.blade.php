@@ -69,20 +69,6 @@
                                 <input type="email" class="form-control" id="emailInput" name="email" value="{{ old('email', $student->email ?? '') }}" autocomplete="off">
                             </div>
 
-                        </div>
-
-                        <div class="col-12 col-lg-4 mb-3">
-
-                            <div class="mb-3 mt-3">
-                                <label for="parentNumberInput" class="form-label">No. wali murid</label>
-                                <input type="text" class="form-control" id="parentNumberInput" name="parent_number" value="{{ old('parent_number', $student->parent_number ?? '') }}" autocomplete="off" required="">
-                            </div>
-
-                            <div class="mb-3 mt-3">
-                                <label for="otherParentNumberInput" class="form-label">No. wali murid lainnya (opsional)</label>
-                                <input type="text" class="form-control" id="otherParentNumberInput" name="other_parent_number" value="{{ old('other_parent_number', $student->other_parent_number ?? '') }}" autocomplete="off">
-                            </div>
-
                             <div class="mb-3">
                                 <div class="container-fluid p-0">
                                     <div class="row">
@@ -105,6 +91,62 @@
                                                 @foreach ($sections as $section)
                                                     <option value="{{ $section['id'] }}" {{ $unit == $section['id'] ? 'selected' : '' }}>{{ $section['name'] }}</option>
                                                 @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-lg-4 mb-3">
+
+                            <div class="mb-3 mt-3">
+                                <label for="parentNumberInput" class="form-label">No. wali murid</label>
+                                <input type="text" class="form-control" id="parentNumberInput" name="parent_number" value="{{ old('parent_number', $student->parent_number ?? '') }}" autocomplete="off" required="">
+                            </div>
+
+                            <div class="mb-3 mt-3">
+                                <label for="otherParentNumberInput" class="form-label">No. wali murid lainnya (opsional)</label>
+                                <input type="text" class="form-control" id="otherParentNumberInput" name="other_parent_number" value="{{ old('other_parent_number', $student->other_parent_number ?? '') }}" autocomplete="off">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="container-fluid p-0">
+                                    <div class="row">
+
+                                        @php
+                                            $grade = old('grade', $student->grade ?? '');
+                                            $major = old('major', $student->major ?? '');
+                                        @endphp
+                                        <div class="col-5">
+                                            <label for="gradeInput" class="form-label">Kelas</label>
+                                            <select class="form-select" id="gradeInput" name="grade" required>
+                                                <option value="A" {{ $grade == 'A' ? 'selected' : '' }}>A</option>
+                                                <option value="B" {{ $grade == 'B' ? 'selected' : '' }}>B</option>
+                                                <option value="1" {{ $grade == '1' ? 'selected' : '' }}>1</option>
+                                                <option value="2" {{ $grade == '2' ? 'selected' : '' }}>2</option>
+                                                <option value="3" {{ $grade == '3' ? 'selected' : '' }}>3</option>
+                                                <option value="4" {{ $grade == '4' ? 'selected' : '' }}>4</option>
+                                                <option value="5" {{ $grade == '5' ? 'selected' : '' }}>5</option>
+                                                <option value="6" {{ $grade == '6' ? 'selected' : '' }}>6</option>
+                                                <option value="7" {{ $grade == '7' ? 'selected' : '' }}>7</option>
+                                                <option value="8" {{ $grade == '8' ? 'selected' : '' }}>8</option>
+                                                <option value="9" {{ $grade == '9' ? 'selected' : '' }}>9</option>
+                                                <option value="10" {{ $grade == '10' ? 'selected' : '' }}>10</option>
+                                                <option value="11" {{ $grade == '11' ? 'selected' : '' }}>11</option>
+                                                <option value="12" {{ $grade == '12' ? 'selected' : '' }}>12</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-7">
+                                            <label for="majorInput" class="form-label">Jurusan</label>
+                                            <select class="form-select" id="majorInput" name="major">
+                                                <option value="" {{ $major == "0" ? 'selected' : '' }}>-- Pilih Jurusan --</option>
+                                                <option value="KEC" {{ $major == "KEC" ? 'selected' : '' }}>Kecantikan</option>
+                                                <option value="KPR" {{ $major == "KPR" ? 'selected' : '' }}>Keperawatan</option>
+                                                <option value="TKJ" {{ $major == "TKJ" ? 'selected' : '' }}>Teknik Komputer & Jaringan</option>
+                                                <option value="RPL" {{ $major == "RPL" ? 'selected' : '' }}>Rekayasa Perangkat Lunak</option>
                                             </select>
                                         </div>
                                     </div>
@@ -157,7 +199,63 @@
         @endif
     </div>
 
+@endsection
+
+@section('modal')
+@endsection
+
+@section('custom-scripts')
+    <!-- Page level plugins -->
+
+    <!-- Page level custom scripts -->
     <script>
+        const gradeOptions = {
+            1: ["A", "B"],              // TK
+            2: ["1", "2", "3", "4", "5", "6"], // SD
+            3: ["7", "8", "9"],         // SMP
+            4: ["10", "11", "12"]       // SMK
+        };
+
+        const unitSelect = document.getElementById('unitInput');
+        const gradeSelect = document.getElementById('gradeInput');
+        const majorSelect = document.getElementById('majorInput');
+
+        function populateGrades(unit, selectedGrade = null) {
+            gradeSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+            if (unit && gradeOptions[unit]) {
+                gradeOptions[unit].forEach(function (grade) {
+                    const option = document.createElement('option');
+                    option.value = grade;
+                    option.textContent = grade;
+                    if (selectedGrade && selectedGrade == grade) {
+                        option.selected = true;
+                    }
+                    gradeSelect.appendChild(option);
+                });
+            }
+
+            if (unit == "4") {
+                majorSelect.removeAttribute('disabled');
+            } else {
+                majorSelect.setAttribute('disabled', 'disabled');
+            }
+        }
+        populateGrades(1);
+
+        // when selected item at #unitInput changed
+        unitSelect.addEventListener('change', function () {
+            populateGrades(this.value);
+        });
+
+        // when there's old value from the server (when editing)
+        const oldUnit = "{{ $unit ?? '' }}";
+        const oldGrade = "{{ $grade ?? '' }}";
+        if (oldUnit) {
+            populateGrades(oldUnit, oldGrade);
+        }
+
+
         $(document).ready(function () {
             FilePond.registerPlugin(FilePondPluginImagePreview);
 
@@ -176,14 +274,4 @@
             });
         });
     </script>
-
-@endsection
-
-@section('modal')
-@endsection
-
-@section('custom-scripts')
-    <!-- Page level plugins -->
-
-    <!-- Page level custom scripts -->
 @endsection

@@ -51,6 +51,7 @@
                             <th rowspan="2">Unit</th>
                             <th rowspan="2">Tgl. Lahir</th>
                             <th rowspan="2">L / P</th>
+                            <th rowspan="2">Kelas</th>
                             <th rowspan="2">Kode Absensi</th>
                             <th colspan="2">No. wali</th>
                             <th rowspan="2">Aksi</th>
@@ -68,6 +69,11 @@
                             <td>{{ $item->section->name }}</td>
                             <td>{{ $item->formatted_birth }}</td>
                             <td>{{ $item->gender }}</td>
+                            @if (isset($item->major))
+                                <td>{{ $item->grade }} - {{ $item->major }}</td>
+                            @else
+                                <td>{{ $item->grade }}</td>
+                            @endif
                             <td>{{ $item->identifier ?? '-' }}</td>
                             <td>{{ $item->parent_number }}</td>
                             <td>{{ $item->other_parent_number ? $item->other_parent_number : '-' }}</td>
