@@ -34,25 +34,51 @@ class StudentImport implements ToCollection
             }
 
             // VALIDASI : KALO NAMA GAADA DATA KE SKIP DAN JENIS KELAMIN CUMA L ATAU P
-            if ($row[0] == null || !in_array(strtolower($row[2]), ['l','p'])) {
+            if ($row[0] == null || !in_array(strtolower($row[4]), ['l','p'])) {
                 continue;
             }
 
             // VALIDASI : KALO ADA IDENTIFIER YANG SAMA KE SKIP
             $existingStudentWithSameIdentifier = DB::table('students')
-                ->where('identifier', $row[4])->first();
+                ->where('identifier', $row[6])->first();
             if ($existingStudentWithSameIdentifier) {
                 continue;
             }
 
-            $row[2] = match(strtolower($row[2])) {
+            $row[4] = match(strtolower($row[4])) {
                 'l'  => 'Laki-laki',
                 'p'  => 'Perempuan',
                 default => null
             };
 
-            if ($row[4] == null) {
-                $row[4] = uniqid()."_".strtoupper($this->unit)."_".str_replace(' ','_',$row[0]);
+            $row[3] = match(strtoupper($row[3])) {
+                'RPL'  => 'RPL',
+                'TKJ'  => 'TKJ',
+                'KPR'  => 'KPR',
+                'KEC'  => 'KEC',
+                default => null
+            };
+
+            $row[2] = match(strtoupper($row[2])) {
+                'A'  => 'A',
+                'B'  => 'B',
+                '1'  => '1',
+                '2'  => '2',
+                '3'  => '3',
+                '4'  => '4',
+                '5'  => '5',
+                '6'  => '6',
+                '7'  => '7',
+                '8'  => '8',
+                '9'  => '9',
+                '10'  => '10',
+                '11'  => '11',
+                '12'  => '12',
+                default => null
+            };
+
+            if ($row[6] == null) {
+                $row[6] = uniqid()."_".strtoupper($this->unit)."_".str_replace(' ','_',$row[0]);
             }
 
             $birthDate = now();
@@ -66,9 +92,11 @@ class StudentImport implements ToCollection
                 'name'          => $row[0],
                 'section_id'    => $this->section_id,
                 'birth'         => $birthDate,
-                'gender'        => $row[2],
-                'parent_number' => normalizePhoneNumber($row[3]),
-                'identifier'    => $row[4],
+                'grade'         => $row[2],
+                'major'         => $row[3],
+                'gender'        => $row[4],
+                'parent_number' => normalizePhoneNumber($row[5]),
+                'identifier'    => $row[6],
             ];
 
             Student::create($newData);
